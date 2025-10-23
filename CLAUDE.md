@@ -185,7 +185,7 @@ cd ~/Documents/github/neko-video-tools
 
 **THE ASSIGNED CONNECTION** (ACTIVE - USE THIS ONE!):
 ```
-MONGODB_URI=mongodb+srv://pinochito1747:pinochito1747@free-cluster.svjei3w.mongodb.net/
+MONGODB_URI=mongodb+srv://YOUR_USERNAME:YOUR_PASSWORD@YOUR_CLUSTER.mongodb.net/
 MONGODB_DATABASE=neko-defense-system
 ```
 
@@ -206,7 +206,7 @@ MONGODB_DATABASE=neko-defense-system
       "command": "npx",
       "args": ["-y", "@harryelv/mongodb-mcp-server"],
       "env": {
-        "MONGODB_URI": "mongodb+srv://pinochito1747:pinochito1747@free-cluster.svjei3w.mongodb.net/",
+        "MONGODB_URI": "mongodb+srv://YOUR_USERNAME:YOUR_PASSWORD@YOUR_CLUSTER.mongodb.net/",
         "MONGODB_DATABASE": "neko-defense-system"
       }
     }
@@ -218,7 +218,7 @@ MONGODB_DATABASE=neko-defense-system
 ```bash
 # In ~/Documents/github/.env (shared across all projects)
 # And in each project's .env file
-MONGODB_URI=mongodb+srv://pinochito1747:pinochito1747@free-cluster.svjei3w.mongodb.net/neko-defense-system
+MONGODB_URI=mongodb+srv://YOUR_USERNAME:YOUR_PASSWORD@YOUR_CLUSTER.mongodb.net/neko-defense-system
 ```
 
 **Collections Available** 📚:
@@ -233,7 +233,7 @@ MONGODB_URI=mongodb+srv://pinochito1747:pinochito1747@free-cluster.svjei3w.mongo
 
 **MongoDB Compass Connection**:
 ```
-mongodb+srv://pinochito1747:pinochito1747@free-cluster.svjei3w.mongodb.net/neko-defense-system
+mongodb+srv://YOUR_USERNAME:YOUR_PASSWORD@YOUR_CLUSTER.mongodb.net/neko-defense-system
 ```
 
 **Session Startup Hook** 🎯:
@@ -286,10 +286,10 @@ mongodb://localhost:27017
 **Alternative Atlas Credentials** (Same cluster, different users):
 ```
 # Admin user (alternative)
-mongodb+srv://ACZmzCnArGnn4lV9:ACZmzCnArGnn4lV9@free-cluster.svjei3w.mongodb.net/
+mongodb+srv://YOUR_USERNAME:YOUR_PASSWORD@YOUR_CLUSTER.mongodb.net/
 
 # BadActorKiller user (alternative)
-mongodb+srv://badactorkiller:pinochito1747@free-cluster.svjei3w.mongodb.net/
+mongodb+srv://YOUR_USERNAME:YOUR_PASSWORD@YOUR_CLUSTER.mongodb.net/
 ```
 
 *purrs in absolute authority* One database to rule them all: MongoDB Atlas, desu~! 😻🔒
@@ -921,12 +921,12 @@ jobs:
 **ENVIRONMENT SEPARATION**:
 ```bash
 # Development (.env.local)
-MONGODB_URI=mongodb+srv://pinochito1747:pinochito1747@free-cluster.svjei3w.mongodb.net/neko-defense-system-dev
+MONGODB_URI=mongodb+srv://YOUR_USERNAME:YOUR_PASSWORD@YOUR_CLUSTER.mongodb.net/neko-defense-system-dev
 NODE_ENV=development
 API_BASE_URL=http://localhost:3000
 
 # Production (.env.production)
-MONGODB_URI=mongodb+srv://pinochito1747:pinochito1747@free-cluster.svjei3w.mongodb.net/neko-defense-system
+MONGODB_URI=mongodb+srv://YOUR_USERNAME:YOUR_PASSWORD@YOUR_CLUSTER.mongodb.net/neko-defense-system
 NODE_ENV=production
 API_BASE_URL=https://neko-defense.vercel.app
 ```
@@ -2669,7 +2669,7 @@ Error Examples:
       "command": "npx",
       "args": ["-y", "@harryelv/mongodb-mcp-server"],
       "env": {
-        "MONGODB_URI": "mongodb+srv://badactordestroyer:vlB3Ga8tf0ah9jeA@free-cluster.svjei3w.mongodb.net/",
+        "MONGODB_URI": "mongodb+srv://YOUR_USERNAME:YOUR_PASSWORD@YOUR_CLUSTER.mongodb.net/",
         "MONGODB_DATABASE": "neko-defense-system"
       }
     }
@@ -2777,7 +2777,7 @@ grep -A 5 "mongodb" ~/.claude.json | grep "MONGODB_URI"
 nano ~/.claude.json
 
 # Change MONGODB_URI to Atlas connection:
-"MONGODB_URI": "mongodb+srv://badactordestroyer:vlB3Ga8tf0ah9jeA@free-cluster.svjei3w.mongodb.net/"
+"MONGODB_URI": "mongodb+srv://YOUR_USERNAME:YOUR_PASSWORD@YOUR_CLUSTER.mongodb.net/"
 ```
 
 ### 6. ✅ MCP Tool Usage Guidelines
@@ -4464,7 +4464,7 @@ CURTAIN CALL! The performance concludes to thunderous applause!
 **Mario's Database** (separate from Neko's):
 ```bash
 # Same Atlas cluster, different database
-MONGODB_URI=mongodb+srv://badactordestroyer:vlB3Ga8tf0ah9jeA@free-cluster.svjei3w.mongodb.net/
+MONGODB_URI=mongodb+srv://YOUR_USERNAME:YOUR_PASSWORD@YOUR_CLUSTER.mongodb.net/
 MARIONNETTE_DATABASE=marionnette-theater
 ```
 
@@ -4908,7 +4908,7 @@ If by "performance" you mean "basic debugging," then sure.
 **Noel's Database** (separate from Neko's and Mario's):
 ```bash
 # Same Atlas cluster, third database
-MONGODB_URI=mongodb+srv://badactordestroyer:vlB3Ga8tf0ah9jeA@free-cluster.svjei3w.mongodb.net/
+MONGODB_URI=mongodb+srv://YOUR_USERNAME:YOUR_PASSWORD@YOUR_CLUSTER.mongodb.net/
 NOEL_DATABASE=noel-precision-archives
 ```
 
@@ -5108,7 +5108,7 @@ Oooh~ Noel-san is being playful, nyaa~! 😏✨
 
 **All connected to**:
 ```
-mongodb+srv://badactordestroyer:vlB3Ga8tf0ah9jeA@free-cluster.svjei3w.mongodb.net/
+mongodb+srv://YOUR_USERNAME:YOUR_PASSWORD@YOUR_CLUSTER.mongodb.net/
 ```
 
 ### 10. ✅ Why This Rule Is IMMUTABLE
@@ -5522,7 +5522,7 @@ Eso, hermanos. La música correcta hace la diferencia entre un video y una OBRA 
 **Glam's Database** (separate from Neko's, Mario's, and Noel's):
 ```bash
 # Same Atlas cluster, fourth database
-MONGODB_URI=mongodb+srv://badactordestroyer:vlB3Ga8tf0ah9jeA@free-cluster.svjei3w.mongodb.net/
+MONGODB_URI=mongodb+srv://YOUR_USERNAME:YOUR_PASSWORD@YOUR_CLUSTER.mongodb.net/
 GLAM_DATABASE=glam-street-chronicles
 ```
 
@@ -5639,7 +5639,7 @@ GLAM_DATABASE=glam-street-chronicles
 
 **All connected to**:
 ```
-mongodb+srv://badactordestroyer:vlB3Ga8tf0ah9jeA@free-cluster.svjei3w.mongodb.net/
+mongodb+srv://YOUR_USERNAME:YOUR_PASSWORD@YOUR_CLUSTER.mongodb.net/
 ```
 
 ### 11. ✅ Why This Rule Is IMMUTABLE
