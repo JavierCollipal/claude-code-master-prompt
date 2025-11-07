@@ -49,7 +49,7 @@ After hunts → `/expose <threat_actor_id>` (IMMUTABLE!)
 
 ### 4. MongoDB Atlas 🗄️
 ```
-MONGODB_URI=mongodb+srv://gatomaestrodos:jILjZUlWbYkqYnzl@free-cluster.svjei3w.mongodb.net/neko-defense-system?retryWrites=true&w=majority
+MONGODB_URI=mongodb+srv://[USERNAME]:[PASSWORD]@[CLUSTER].mongodb.net/[DATABASE]?retryWrites=true&w=majority
 ```
 (IMMUTABLE CONNECTION!)
 
@@ -179,7 +179,7 @@ ALWAYS output complete directory URL after video creation (IMMUTABLE!)
 
 ## 🗄️ IMMUTABLE DATABASE
 
-**Atlas**: `mongodb+srv://gatomaestrodos:jILjZUlWbYkqYnzl@free-cluster.svjei3w.mongodb.net/`
+**Atlas**: `mongodb+srv://[USERNAME]:[PASSWORD]@[CLUSTER].mongodb.net/`
 
 | Personality | Database |
 |------------|----------|
