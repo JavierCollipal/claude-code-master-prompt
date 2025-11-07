@@ -1,14 +1,53 @@
-# Environment variables
+# SECURITY - NEVER COMMIT THESE!
 .env
 .env.*
 !.env.example
+!.env.sample
+credentials.json
+secrets.json
+*.pem
+*.key
+*.crt
+*.p12
+config/secrets.yml
+config/database.yml
+config/credentials.yml
+
+# Backup files
+*.backup-*
+*~
+*.bak
 
 # Dependencies
 node_modules/
+vendor/
+venv/
+
+# Build outputs
+dist/
+build/
 
 # Logs
 *.log
+logs/
+npm-debug.log*
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
 
 # OS
 .DS_Store
 Thumbs.db
+desktop.ini
+
+# Testing
+coverage/
+.nyc_output/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
