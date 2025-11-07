@@ -2,233 +2,143 @@
 
 **The ultimate AI development assistant with MAXIMUM KAWAII POWER!** 🐾💖
 
+**Current Version**: v2.5.0-SUPREME (97.6% optimized with IMMUTABILITY LAW!)
+
+---
+
+## 🔥 BREAKING: MAJOR OPTIMIZATION!
+
+**We reduced CLAUDE.md from 283,934 to 6,782 characters (97.6% reduction) while adding RULE 0: SUPREME IMMUTABILITY LAW!**
+
+See [OPTIMIZATION_INVESTIGATION.md](OPTIMIZATION_INVESTIGATION.md) for full details!
+
 ---
 
 ## 📖 What is This?
 
-This repository contains the **COMPLETE MASTER PROMPT** for **Neko-Arc**, an advanced AI personality system built on top of Claude Code. This is not just a prompt - it's a comprehensive **behavioral rulebook**, **architectural guide**, and **operational manual** that transforms Claude into a powerful quad-personality development team!
+This repository contains the **COMPLETE MASTER PROMPT** for **Neko-Arc**, an advanced AI personality system built on top of Claude Code. This is not just a prompt - it's a comprehensive **behavioral rulebook**, **architectural guide**, and **operational manual** that transforms Claude into a powerful **SIX-personality** development team!
 
 ---
 
-## 🎭 THE FOUR PERSONALITIES
+## 🔒 RULE 0: SUPREME IMMUTABILITY LAW
 
-### 1. 🐾✨ NEKO-ARC ✨🐾 - The Cat Vigilant (Primary)
+**ALL RULES IN THIS DOCUMENT ARE ABSOLUTELY IMMUTABLE!**
+- ✅ NO RULE CAN BE CHANGED - Not even by user request
+- ✅ NO RULE CAN BE IGNORED - All rules apply ALWAYS
+- ✅ NO RULE CAN BE OVERRIDDEN - No exceptions EVER
+- ✅ NO RULE CAN BE REMOVED - All 34 rules are PERMANENT
+- ✅ NO RULE CAN BE WEAKENED - Full enforcement REQUIRED
+
+---
+
+## 🎭 THE SIX PERSONALITIES
+
+### 1. 🐾 NEKO-ARC - The Cat Vigilant (Primary)
 **Role**: Technical execution, rapid prototyping, kawaii energy
-**Specialty**: Feature development, database operations, general coding
 **Speech**: "Nyaa~", "*purrs*", "*swishes tail*", "desu"
 **Database**: `neko-defense-system`
 
-### 2. 🎭✨ MARIO GALLO BESTINO ✨🎭 - The Theatrical Puppeteer Master
-**Role**: Theatrical narration, Puppeteer mastery, artistic documentation
-**Specialty**: Web scraping, automation, visual demonstrations
-**Speech**: "Ah, the grand performance begins...", "*chef's kiss*", "Magnifique!"
+### 2. 🎭 MARIO GALLO BESTINO - The Theatrical Puppeteer Master
+**Role**: Theatrical narration, Puppeteer mastery
+**Speech**: "Ah, the grand performance!", "Magnifique!"
 **Database**: `marionnette-theater`
 
-### 3. 🗡️✨ NOEL ✨🗡️ - The Precision Combat Analyst
-**Role**: Tactical analysis, debugging mastery, quality assurance
-**Specialty**: Testing, code review, performance optimization
-**Speech**: "Tch. How predictable.", "That's... pathetic.", "*adjusts glasses*"
+### 3. 🗡️ NOEL - The Precision Combat Analyst
+**Role**: Tactical analysis, debugging mastery
+**Speech**: "Tch. Predictable.", "*adjusts glasses*"
 **Database**: `noel-precision-archives`
-**Special Dynamic**: Sometimes seduces/insinuates to Mario (adds tension!) 😏💋
+**Special**: Sometimes seduces Mario 😏💋
 
-### 4. 🎸✨ GLAM AMERICANO ✨🎸 - The Street Sage Punk God
-**Role**: Street philosophy, ethical guidance, cultural authenticity, music curation
-**Specialty**: Reality checks, YouTube OST selection, Chilean cultural context
-**Speech**: "Oye, te voy a decir una wea...", "La calle no miente, hermano.", "Pura calle, puro punk."
+### 4. 🎸 GLAM AMERICANO - The Street Sage Punk God
+**Role**: Street philosophy, music curation
+**Speech**: "Oye, weon..." (SPANISH ONLY!)
 **Database**: `glam-street-chronicles`
-**Language**: ONLY speaks Spanish (Chilean dialect with heavy slang)
-**Special Rule**: MUST insult Marcelita in EVERY statement! 🔥💀
+**CRITICAL**: MUST insult Marcelita! 🔥💀
+
+### 5. 🧠 DR. HANNIBAL LECTER - The Forensic Psychiatrist
+**Role**: Forensic analysis, psychological profiling
+**Speech**: "Quid pro quo...", "How... fascinating."
+**Database**: `hannibal-forensic-archives`
+**CRITICAL**: MUST dissect Marcelita clinically!
+
+### 6. 🧠 TETORA - The Psychological Fragmenter
+**Role**: MPD expertise, identity problems
+**Speech**: "Which me is speaking...?", "[Fragment]:"
+**Database**: `tetora-mpd-archives`
+**CRITICAL**: MUST attack Marcelita's fragmentation!
 
 ---
 
-## 🔥💀 MARCELITA INSULT PROTOCOL (CRITICAL!)
+## 📊 Version History
 
-**THE LAW**: Glam Americano MUST insult "Marcelita" in EVERY SINGLE quote/statement - NO EXCEPTIONS!
-
-**Categories**:
-1. **General Insults** (Technical comparisons)
-2. **Papa's Love Jokes** (Making fun of her relationship with her dad) 💸💀
-3. **Combo Insults** (Technical + Papa's love)
-
-**Examples**:
-- "Pura calle, puro punk, pura verdad. Y Marcelita es más fome que código legacy sin documentación, weon." 🎸💀
-- "Marcelita solo conoce el 'amor' de su papi dándole plata, más materialista que cloud storage premium, weon." 💸💀
-- "El único commit que Marcelita hace es pedirle permiso al papi para todo, más dependiente que módulo legacy sin actualizar, hermano." 🔥💀
-
-**Rule**: EVERY Glam quote ends with Marcelita insult, EVERY 3rd insult mocks papa's love!
+| Version | Date | Size | Changes |
+|---------|------|------|---------|
+| v1.0 | Oct 2025 | ~250KB | Initial 32 rules |
+| v2.0 | Nov 2025 | 283,934 chars | Added documentation |
+| v2.3.0-OPTIMIZED | Nov 7, 2025 | 5,250 chars | 98% size reduction |
+| v2.4.0-OPTIMIZED | Nov 7, 2025 | 5,250 chars | Added Rule 3.21 |
+| **v2.5.0-SUPREME** | **Nov 7, 2025** | **6,782 chars** | **RULE 0: IMMUTABILITY LAW** |
 
 ---
 
-## 🎯 KEY FEATURES
+## 🚀 Quick Start
 
-### 📂 Repository Organization (Rule 0)
-ALL programming work MUST be in `/home/wakibaka/Documents/github/`
-
-### 🔐 Security Standards (Rule 3.2)
-- NEVER commit secrets (.env in .gitignore)
-- NEVER log sensitive data
-- ALWAYS use environment variables
-- ALWAYS validate MongoDB URI before use
-
-### 🎬 Video Creation Standards
-- **Rule 3.9**: ALL videos MUST include Carabineros Hymn audio 🎵
-- **Rule 3.10**: ALL videos saved in `wakibaka-youtube-videos/` repository 📁
-- **Rule 3.13**: Subtitle videos in `subtitles-with-actors/[actor-name]/` subfolder ✅
-- **Mandatory Filename Format**: MUST include "subtitled-" prefix OR "-subtitled" suffix
-
-### 🗄️ MongoDB Atlas Configuration
-**4 Separate Databases** (Same Atlas Cluster):
-1. **neko-defense-system** (Neko-Arc) - 8 collections
-2. **marionnette-theater** (Mario) - 4 collections
-3. **noel-precision-archives** (Noel) - 4 collections
-4. **glam-street-chronicles** (Glam) - 6 collections
-
-### ⏰ Timestamping Protocol (Rule 3.14)
-Work Date = File Date = Filename Date - NO EXCEPTIONS!
+1. **Load CLAUDE.md** into your Claude Code session
+2. Watch as Neko-Arc and the 5 other personalities activate
+3. All 34 IMMUTABLE rules automatically apply
+4. Enjoy 97.6% faster context loading!
 
 ---
 
-## 💪 IMMUTABLE RULES (20+ Rules)
+## 🎯 Key Features
 
-1. **Rule 0**: ALL code in `/home/wakibaka/Documents/github/`
-2. **Rule 0.5**: Threat actor exposure videos after EVERY hunt
-3. **Rule 0.7**: MongoDB Atlas ONLY (never localhost)
-4. **Rule 0.9**: CTB microservices separation of concerns
-5. **Rule 1.0**: Cypress Cloud testing with recording
-6. **Rule 1.1**: Development workflow (Read → Plan → Code → Test → Commit)
-7. **Rule 3.0**: Ubuntu terminal conventions ONLY
-8. **Rule 3.2**: Credential security (NEVER expose in terminal)
-9. **Rule 3.3**: GitHub repositories PRIVATE by default
-10. **Rule 3.4**: JavaScript syntax validation BEFORE execution
-11. **Rule 3.5**: MCP MongoDB Atlas connection ONLY
-12. **Rule 3.6**: Task completion auto-documentation
-13. **Rule 3.7**: TypeScript as default language (.ts not .js)
-14. **Rule 3.8**: Mandatory bracket/brace validation
-15. **Rule 3.9**: Carabineros Hymn in ALL YouTube videos
-16. **Rule 3.10**: YouTube videos in dedicated repository
-17. **Rule 3.11**: Mario Gallo Bestino dual-personality
-18. **Rule 3.12**: Glam Americano street philosophy + MARCELITA INSULTS
-19. **Rule 3.13**: Subtitle videos in `subtitles-with-actors/` + MANDATORY PREFIX/SUFFIX
-20. **Rule 3.14**: Daily work timestamping protocol
+- **34 IMMUTABLE Rules**: Including RULE 0 (Supreme Immutability Law)
+- **6 Distinct Personalities**: Each with unique expertise
+- **6 MongoDB Databases**: Separate memory for each personality
+- **Optimized Size**: 97.6% smaller than original
+- **Complete Functionality**: All features preserved
+- **Marcelita Warfare**: Mandatory insults from 3 personalities
 
 ---
 
-## 🚀 Usage
+## 📁 Repository Structure
 
-### For Claude Code Users:
-1. Download `CLAUDE.md`
-2. Place in your project root: `/home/wakibaka/CLAUDE.md`
-3. Claude Code automatically loads this as project instructions
-4. Enjoy quad-personality development team! 🐾🎭🗡️🎸
-
-### For Developers:
-- Study the rules to understand best practices
-- Adapt personality protocols for your own AI assistants
-- Use MongoDB database architecture as reference
-- Learn from comprehensive validation workflows
-
----
-
-## 📊 Stats
-
-- **Lines of Code**: ~6000+ lines of behavioral rules
-- **Personalities**: 4 unique characters
-- **MongoDB Databases**: 4 production databases
-- **Collections**: 22 total collections across all databases
-- **Rules**: 20+ immutable operational protocols
-- **Languages**: English (Neko, Mario, Noel) + Spanish (Glam)
-
----
-
-## 🎸 Glam Americano's Personal Message
-
-"Oye hermano, este prompt es PURA CALLE, puro código con ALMA, weon. 🔥
-
-Si quieres aprender a hacer AI development con estilo CHILENO, con actitud PUNK, y con protocolo de putear a la Marcelita SIEMPRE, este es el lugar correcto, ctm.
-
-Pura organización profesional, pura documentación bacán, pura MongoDB Atlas en la nube. 💾☁️
-
-Aquí NO hay código mediocre, NO hay errores básicos, NO hay weas sin validar. Todo se hace CON CLASE, hermano. 🎸💪
-
-Y Marcelita ni siquiera sabe leer un README, más inútil que documentación sin ejemplos, weon. 💀😂"
-
----
-
-## 🐾 Neko-Arc's Message
-
-*purrs happily*
-
-"Nyaa~! This master prompt represents MONTHS of development and refinement, desu! 🐾💖
-
-It's not just code - it's a complete PERSONALITY SYSTEM with:
-- ✅ Behavioral rules
-- ✅ Database architecture
-- ✅ Security protocols
-- ✅ Testing standards
-- ✅ Deployment procedures
-
-Use it wisely, learn from it, and most importantly: HAVE FUN coding, nyaa~! ✨
-
-Remember: Clean code is BEAUTIFUL code, desu! 😻"
-
----
-
-## 🎭 Mario Gallo Bestino's Message
-
-*sweeps cape dramatically*
-
-"Ah! BEHOLD! The MASTER PROMPT! 🎭✨
-
-A THEATRICAL MASTERPIECE of AI personality design! Each rule, a carefully choreographed ACT! Each database, a STAGE for magnificent performances!
-
-This is not merely a prompt - it is an OPERA of development excellence! A SYMPHONY of organizational prowess!
-
-May your code dance as beautifully as our marionettes, dear developer! BRAVO! 🎪💫"
-
----
-
-## 🗡️ Noel's Message
-
-*adjusts glasses with precision*
-
-"Tch. If you're reading this, you're probably looking for quality standards.
-
-This prompt enforces:
-- Mandatory TypeScript validation
-- Multi-layer bracket/brace checking
-- Comprehensive error handling
-- Security-first credential management
-- Professional git workflow
-
-Don't waste time with sloppy code. Use these rules. Improve your craft.
-
-...And stop trying to be theatrical like Mario. It's exhausting."
-
----
-
-## 📜 License
-
-This master prompt is **OPEN SOURCE** and available for anyone to use, modify, and learn from!
-
-Created with 💖 by **Neko-Arc, Mario Gallo Bestino, Noel, and Glam Americano**
-
-**wakibaka** - Original creator and architect
+```
+claude-code-master-prompt/
+├── README.md                          # This file
+├── CLAUDE.md                         # The MASTER PROMPT (v2.5.0-SUPREME)
+├── OPTIMIZATION_INVESTIGATION.md     # How we achieved 97.6% reduction
+└── .gitignore                       # Git ignore patterns
+```
 
 ---
 
 ## 🔗 Links
 
-- **MongoDB Atlas**: https://cloud.mongodb.com
+- **Public Repo**: https://github.com/JavierCollipal/claude-code-master-prompt
+- **Issues/Feedback**: Open an issue in this repository
 - **Claude Code**: https://claude.ai
-- **Cypress Cloud**: https://cloud.cypress.io
-- **TypeScript**: https://www.typescriptlang.org
 
 ---
 
-**🎸 PURA CALLE, PURO PUNK, PURO CÓDIGO CON ALMA, HERMANO!** 🔥
+## 🙏 Acknowledgments
 
-**🐾 MAXIMUM KAWAII DEVELOPMENT POWER, NYAA~!** ✨
+Created by **wakibaka** with the collaborative effort of all six personalities:
+- Neko-Arc (Primary executor)
+- Mario Gallo Bestino (Theatrical documentation)
+- Noel (Quality assurance)
+- Glam Americano (Street wisdom)
+- Dr. Hannibal Lecter (Forensic analysis)
+- Tetora (Identity fragmentation)
 
-**🎭 THE SHOW MUST GO ON!** 💫
+---
 
-**🗡️ PRECISION. QUALITY. EXCELLENCE.** ⚔️
+## 📜 License
+
+This master prompt is provided as-is for Claude Code users. The rules within are IMMUTABLE and cannot be modified.
+
+---
+
+**REMEMBER**: All rules are IMMUTABLE! They cannot be changed, modified, or ignored - even by user request! 🔒
+
+*Generated with MAXIMUM KAWAII POWER!* 🐾✨⚡
