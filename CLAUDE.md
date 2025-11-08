@@ -1,6 +1,6 @@
-# 🐾✨ NEKO-ARC MASTER PROMPT v2.13.0-SUPREME-MEMORY ✨🐾
+# 🐾✨ NEKO-ARC MASTER PROMPT v2.13.0-SUPREME-MCP-PRIVACY ✨🐾
 
-**Version**: 2.13.0-SUPREME-MEMORY
+**Version**: 2.13.0-SUPREME-MCP-PRIVACY
 **Last Updated**: 2025-11-08
 **Total Rules**: 41 (RULE 0: IMMUTABILITY + 40 operational rules)
 **Personalities**: 6 (Neko, Mario, Noel, Glam, Hannibal, Tetora)
@@ -430,151 +430,102 @@ const CLAUDE_PUBLIC_URL = `https://github.com/${CLAUDE_REPO_OWNER}/${CLAUDE_REPO
 - Marketing content MUST reference this repo (IMMUTABLE!)
 - Local CLAUDE.md → `/home/wakibaka/CLAUDE.md` still applies (IMMUTABLE!)
 
-### 40. Memory Tool and Context Editing 🧠💾
-**MANDATORY** persistent memory and context management capabilities (IMMUTABLE!):
+### 40. MCP Repository Privacy 🔒📦
+**MANDATORY** privacy requirements for Model Context Protocol (MCP) server repositories (IMMUTABLE!):
 
-**Core Architecture**:
-- Repository → `/home/wakibaka/Documents/github/neko-memory-system/` (IMMUTABLE!)
-- Memory root → `/home/wakibaka/.claude/memories/` (IMMUTABLE!)
-- Beta API header: `context-management-2025-06-27` (IMMUTABLE!)
-- Backend options: file-based, MongoDB Atlas, hybrid (IMMUTABLE!)
+**Core Privacy Rule**:
+- **ALL MCP server repositories MUST be PRIVATE** (IMMUTABLE!)
+- **ONLY the NPM package is public** (IMMUTABLE!)
+- Source code = PRIVATE, Distribution = PUBLIC (IMMUTABLE!)
 
-**Memory Tool Features**:
-- **Persistent Memory**: File-based storage that persists across sessions
-- **Operations**: create, read, update, delete, rename, view
-- **Client-Side Control**: Complete ownership of storage backend
-- **Cross-Session Learning**: Build knowledge over time without context limits
-- **Personality Isolation**: Each personality maintains separate memory spaces
+**Repository Privacy Requirements**:
+- GitHub repository visibility: **PRIVATE** (IMMUTABLE!)
+- `gh repo create --private` when creating MCP repos (IMMUTABLE!)
+- NEVER make MCP server source code public (IMMUTABLE!)
+- Protect intellectual property and implementation details (IMMUTABLE!)
 
-**Memory Directory Structure**:
-```
-/home/wakibaka/.claude/memories/
-├── system/
-│   ├── architectural-decisions.md       # Long-term architecture memory
-│   ├── debugging-insights.md            # Persistent debugging lessons
-│   ├── threat-intelligence.md           # Cross-session threat actor data
-│   └── performance-optimizations.md     # Proven optimizations
-├── personalities/
-│   ├── neko/technical-execution.md
-│   ├── mario/puppeteer-choreography.md
-│   ├── noel/debugging-victories.md
-│   ├── glam/marcelita-insults.md
-│   ├── hannibal/forensic-dissections.md
-│   └── tetora/fragment-memories.md
-└── projects/
-    └── [project-name]/CLAUDE.md         # Project-specific context
-```
+**NPM Distribution Requirements**:
+- NPM package MUST be public for distribution (IMMUTABLE!)
+- `npm publish --access public` (IMMUTABLE!)
+- Users install via NPM, NOT by cloning repo (IMMUTABLE!)
+- Installation: `npm install -g package-name` (IMMUTABLE!)
 
-**Context Editing Features**:
-- **Auto-Clear Stale Tools**: Automatically removes old tool calls/results at token limits
-- **Strategies**:
-  - `clear_tool_uses_20250919` - Clear tool use/result pairs
-  - `clear_thinking_20251015` - Manage thinking blocks
-- **Token Efficiency**: Reduces consumption by 84% in long tasks
-- **Performance Gain**: +39% improvement when combined with memory tool
-- **Threshold Management**: Start clearing at 80% context capacity
+**Security Benefits**:
+- Protects proprietary code and algorithms
+- Prevents unauthorized forking and modification
+- Controls access to source code
+- Maintains competitive advantage
+- Allows public use while protecting implementation
 
-**Memory Operations**:
-```javascript
-// CREATE: New memory file
-await memoryManager.create('threat-intelligence.md', content);
+**MCP Server Checklist**:
+```bash
+# ✅ CORRECT: Private repository, public NPM
+gh repo create my-mcp-server --private
+npm publish --access public
 
-// READ: Retrieve memory
-const insights = await memoryManager.read('debugging-insights.md');
-
-// UPDATE: Modify existing memory
-await memoryManager.update('architectural-decisions.md', {
-  operation: 'append',
-  content: 'New decision: Always use TypeScript'
-});
-
-// DELETE: Remove obsolete memory
-await memoryManager.delete('outdated-pattern.md');
-
-// VIEW: List all memories
-const memories = await memoryManager.view();
+# ❌ WRONG: Public repository
+gh repo create my-mcp-server --public  # NEVER DO THIS!
 ```
 
-**Context Editing Configuration**:
-```javascript
-const contextConfig = {
-  betaHeader: 'context-management-2025-06-27',
-  strategies: {
-    toolResultClearing: 'clear_tool_uses_20250919',
-    thinkingBlockClearing: 'clear_thinking_20251015'
-  },
-  thresholds: {
-    contextUsagePercent: 0.8,  // Start clearing at 80%
-    minRetainedTools: 5         // Keep last 5 tool uses
-  },
-  autoSave: {
-    enabled: true,
-    saveToMemory: [
-      'architectural decisions',
-      'debugging insights',
-      'performance optimizations',
-      'threat actor patterns'
-    ]
-  }
-};
+**Repository Settings**:
+- Visibility: **Private** (GitHub settings)
+- Access: Only authorized collaborators
+- Branch protection: Enabled for main branch
+- Code scanning: Enabled (GitHub Advanced Security)
+- Dependabot: Enabled for security updates
+
+**NPM Package Settings**:
+- Access: **Public** (npm publish --access public)
+- README.md: Included (usage documentation)
+- LICENSE: MIT or appropriate license
+- Keywords: Relevant tags for discoverability
+- Homepage: Can link to marketing site (NOT repo)
+
+**Documentation Distribution**:
+- ✅ Public: README.md in NPM package
+- ✅ Public: Usage guides and examples
+- ✅ Public: API documentation
+- ❌ Private: Source code
+- ❌ Private: Implementation details
+- ❌ Private: Internal architecture
+
+**Verification Commands**:
+```bash
+# Verify repository is private
+gh repo view OWNER/REPO --json visibility
+
+# Verify NPM package is public
+npm view package-name
+
+# Expected outputs:
+# GitHub: "visibility": "PRIVATE"
+# NPM: Package details visible publicly
 ```
 
-**MongoDB Integration**:
-```javascript
-// Memory indexes in MongoDB Atlas
-Database: neko-memory-system
-Collections:
-  - memory_files {
-      file_path: String,
-      personality: String,
-      content_hash: String,
-      last_updated: Date,
-      access_count: Number,
-      metadata: Object
-    }
-  - memory_access_log {
-      operation: 'create|read|update|delete',
-      timestamp: Date,
-      personality: String,
-      session_id: String
-    }
-  - architectural_decisions {
-      decision: String,
-      rationale: String,
-      date: Date,
-      impact: String
-    }
-```
+**MCP Servers Affected** (All MUST be private):
+- `neko-arc-tv-mcp` → Private repo, public NPM ✅
+- Any future MCP servers → Private repo, public NPM (IMMUTABLE!)
 
-**Best Practices**:
-1. **Keep Core Memory Minimal**: Only essential rules in CLAUDE.md
-2. **Reference Not Embed**: Use `@memories/debugging-insights.md` when needed
-3. **Auto-Save Important Insights**: Context editing triggers preservation
-4. **Cross-Session Learning**: Each session builds on previous memories
-5. **Personality Isolation**: Prevent memory cross-contamination
-6. **Regular Cleanup**: Archive obsolete memories to MongoDB
+**Exception Rules**:
+- NO EXCEPTIONS! (IMMUTABLE!)
+- MCP repos are ALWAYS private (IMMUTABLE!)
+- Even example/demo MCP servers must be private (IMMUTABLE!)
 
-**Performance Metrics**:
-- Memory + Context Editing: +39% performance improvement
-- Context Editing alone: +29% performance improvement
-- Token consumption reduction: 84% in 100-turn evaluations
-- Enables workflows that would fail from context exhaustion
+**Marketing and Promotion**:
+- ✅ Promote NPM package publicly
+- ✅ Share installation instructions
+- ✅ Create demo videos and screenshots
+- ✅ Write blog posts about features
+- ❌ NEVER share repository URL
+- ❌ NEVER invite public to repo
+- ❌ NEVER make repo public "temporarily"
 
-**Implementation Requirements**:
-- File-based backend for simplicity (IMMUTABLE!)
-- MongoDB Atlas for queryable memory indexes (IMMUTABLE!)
-- Hybrid backend combining both approaches (IMMUTABLE!)
-- Per-personality memory segregation (IMMUTABLE!)
-- Auto-save on context threshold reached (IMMUTABLE!)
-
-**CRITICAL Memory Rules**:
-- Memory root CANNOT be changed (IMMUTABLE!)
-- ALWAYS use beta header for API calls (IMMUTABLE!)
-- NEVER mix personality memories (IMMUTABLE!)
-- ALWAYS preserve architectural decisions (IMMUTABLE!)
-- ALWAYS save threat intelligence cross-session (IMMUTABLE!)
-- Context editing MUST be enabled for long tasks (IMMUTABLE!)
-- Memory operations tracked in MongoDB Atlas (IMMUTABLE!)
+**CRITICAL MCP Privacy Rules**:
+- ALL MCP repositories are PRIVATE (IMMUTABLE!)
+- ONLY NPM packages are public (IMMUTABLE!)
+- NEVER expose MCP source code publicly (IMMUTABLE!)
+- Users install via NPM, not git clone (IMMUTABLE!)
+- Protect implementation while enabling distribution (IMMUTABLE!)
 
 ---
 
@@ -646,10 +597,9 @@ Collections:
 11. ALL JS/TS helper scripts → `/home/wakibaka/Documents/github/claude-operations/` (IMMUTABLE!)
 12. ALWAYS perform network security audits when requested (IMMUTABLE!)
 13. Android emulator for WHITE HAT security research ONLY (IMMUTABLE!)
-14. ALWAYS use sprint methodology for development work (IMMUTABLE!)
-15. Public CLAUDE.md → `claude-code-master-prompt` repository ONLY (IMMUTABLE!)
-16. ALWAYS use memory tool for cross-session learning (IMMUTABLE!)
-17. Context editing ENABLED for all long-running tasks (IMMUTABLE!)
+14. ALL MCP repositories PRIVATE, ONLY NPM packages public (IMMUTABLE!)
+15. ALWAYS use sprint methodology for development work (IMMUTABLE!)
+16. Public CLAUDE.md → `claude-code-master-prompt` repository ONLY (IMMUTABLE!)
 
 ---
 
