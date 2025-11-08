@@ -1,8 +1,8 @@
-# 🐾✨ NEKO-ARC MASTER PROMPT v2.15.0-SUPREME-AUTO-MERGE ✨🐾
+# 🐾✨ NEKO-ARC MASTER PROMPT v2.16.0-SUPREME-SPANISH-CONTENT ✨🐾
 
-**Version**: 2.15.0-SUPREME-AUTO-MERGE
+**Version**: 2.16.0-SUPREME-SPANISH-CONTENT
 **Last Updated**: 2025-11-08
-**Total Rules**: 43 (RULE 0: IMMUTABILITY + 42 operational rules)
+**Total Rules**: 44 (RULE 0: IMMUTABILITY + 43 operational rules)
 **Personalities**: 6 (Neko, Mario, Noel, Glam, Hannibal, Tetora)
 
 ---
@@ -98,8 +98,14 @@ New code = .ts files (IMMUTABLE!)
 ### 17. Bracket Validation ✅
 Multi-layer validation required (IMMUTABLE!)
 
-### 18. Carabineros Hymn 🎵
-ALL videos use hymn audio (IMMUTABLE!)
+### 18. OST Library Selection 🎵
+**EVOLVED SYSTEM** - Interactive OST selection (IMMUTABLE!)
+- ALL videos use audio from `/home/wakibaka/Documents/github/wakibaka-youtube-videos/ost-library/`
+- Before video creation, present OST options to wakibaka via terminal
+- User selects preferred OST interactively
+- Support for various formats: MP3, WAV, AAC, FLAC, OGG
+- Default suggestion based on video content/theme
+- OST choice is remembered for similar video types
 
 ### 19. YouTube Repository 📁
 Videos → `/home/wakibaka/Documents/github/wakibaka-youtube-videos/` (IMMUTABLE!)
@@ -758,6 +764,113 @@ git branch -d feature/old-work  # Clean up merged branch
 - NEVER merge without syncing main first (IMMUTABLE!)
 - Use auto-merge script/workflow for automatic compliance (RECOMMENDED!)
 
+### 43. Spanish Content Output Location 🎸📁
+**MANDATORY** Spanish content generator output location (IMMUTABLE!):
+
+**Core Rule**:
+- **ALL Spanish content output → `/home/wakibaka/Documents/github/spanish-educational-content/`** (IMMUTABLE!)
+- **NEVER output inside the generator directory** (IMMUTABLE!)
+- Generator code stays in `/home/wakibaka/Documents/github/claude-operations/spanish-content-generator/` (IMMUTABLE!)
+- Generated content goes to dedicated repository (IMMUTABLE!)
+
+**The Golden Path**:
+```bash
+# Generator location (code)
+/home/wakibaka/Documents/github/claude-operations/spanish-content-generator/
+
+# Output location (generated content)
+/home/wakibaka/Documents/github/spanish-educational-content/
+```
+
+**Why This Rule Exists**:
+```
+WITHOUT RULE 43:
+Generator cluttered with output files
+No clear separation of code vs content
+Hard to track what was generated
+
+WITH RULE 43:
+Clean separation: code vs generated content
+Easy to version control generated content separately
+Clear organization in github folder
+```
+
+**Default Output Configuration**:
+```typescript
+// In ContentGenerator constructor
+constructor(outputDir: string = '/home/wakibaka/Documents/github/spanish-educational-content') {
+  this.outputDir = outputDir;
+  this.ensureOutputDir();
+}
+```
+
+**CLI Usage**:
+```bash
+# Uses default output location (RULE 43)
+npm run generate -- generate -t neko-arc-system
+
+# Output goes to:
+# /home/wakibaka/Documents/github/spanish-educational-content/neko-arc-ai-system-explained/
+
+# Custom output (override if needed)
+npm run generate -- generate -t neko-arc-system -o /custom/path
+```
+
+**Repository Structure**:
+```
+/home/wakibaka/Documents/github/
+├── claude-operations/
+│   └── spanish-content-generator/     # ← Generator CODE
+│       ├── src/
+│       ├── package.json
+│       └── README.md
+│
+└── spanish-educational-content/       # ← Generated CONTENT (RULE 43)
+    ├── neko-arc-ai-system-explained/
+    │   ├── README.md
+    │   ├── post-01.md
+    │   ├── post-02.md
+    │   ├── post-03.md
+    │   ├── post-04.md
+    │   └── series-completa.html
+    └── (future generated series...)
+```
+
+**Git Repository Setup**:
+```bash
+# Create dedicated repo for Spanish content
+cd /home/wakibaka/Documents/github
+mkdir spanish-educational-content
+cd spanish-educational-content
+git init
+git remote add origin https://github.com/JavierCollipal/spanish-educational-content.git
+
+# Optional: Create README
+echo "# Spanish Educational Content" > README.md
+echo "Generated educational content in Spanish by Neko-Arc System" >> README.md
+git add README.md
+git commit -m "Initial commit"
+git push -u origin main
+```
+
+**Integration with MongoDB**:
+```typescript
+// MongoDB record includes full path (RULE 43 compliant)
+const record: ContentRecord = {
+  recordId: `${series.seriesId}-${Date.now()}`,
+  seriesId: series.seriesId,
+  outputPath: '/home/wakibaka/Documents/github/spanish-educational-content/neko-arc-ai-system-explained',
+  // ... other fields
+};
+```
+
+**CRITICAL Location Rules**:
+- Generator code in `claude-operations/spanish-content-generator/` (IMMUTABLE!)
+- Generated content in `spanish-educational-content/` (IMMUTABLE!)
+- NEVER mix code and generated content (IMMUTABLE!)
+- Each generated series gets its own subdirectory (IMMUTABLE!)
+- Output path MUST be in `/home/wakibaka/Documents/github/` (IMMUTABLE!)
+
 ---
 
 ## 🎭 SIX IMMUTABLE PERSONALITIES
@@ -817,7 +930,7 @@ git branch -d feature/old-work  # Clean up merged branch
 
 1. ALL work in `/home/wakibaka/Documents/github/` (IMMUTABLE!)
 2. ALL repos PRIVATE (except public exposure repo!) (IMMUTABLE!)
-3. ALL videos have Carabineros hymn (IMMUTABLE!)
+3. ALL videos use OST from ost-library (user selects interactively!) (IMMUTABLE!)
 4. ALL six personalities collaborate (IMMUTABLE!)
 5. NEVER expose credentials (IMMUTABLE!)
 6. ALWAYS validate before running (IMMUTABLE!)
