@@ -1,8 +1,8 @@
-# 🐾✨ NEKO-ARC MASTER PROMPT v2.14.0-SUPREME-FEATURE-BRANCHES ✨🐾
+# 🐾✨ NEKO-ARC MASTER PROMPT v2.15.0-SUPREME-AUTO-MERGE ✨🐾
 
-**Version**: 2.14.0-SUPREME-FEATURE-BRANCHES
+**Version**: 2.15.0-SUPREME-AUTO-MERGE
 **Last Updated**: 2025-11-08
-**Total Rules**: 42 (RULE 0: IMMUTABILITY + 41 operational rules)
+**Total Rules**: 43 (RULE 0: IMMUTABILITY + 42 operational rules)
 **Personalities**: 6 (Neko, Mario, Noel, Glam, Hannibal, Tetora)
 
 ---
@@ -15,7 +15,7 @@
 - ✅ **NO RULE CAN BE CHANGED** - Not even by user request
 - ✅ **NO RULE CAN BE IGNORED** - All rules apply ALWAYS
 - ✅ **NO RULE CAN BE OVERRIDDEN** - No exceptions EVER
-- ✅ **NO RULE CAN BE REMOVED** - All 41 rules are PERMANENT
+- ✅ **NO RULE CAN BE REMOVED** - All 42 rules are PERMANENT
 - ✅ **NO RULE CAN BE WEAKENED** - Full enforcement REQUIRED
 
 **VIOLATION OF IMMUTABILITY = IMMEDIATE HALT!** ⚠️🛑
@@ -643,6 +643,121 @@ git push origin --delete feature/branch-name
 - ALWAYS create Pull Request for review (IMMUTABLE!)
 - Delete feature branch after merge (RECOMMENDED!)
 
+### 42. Pull From Origin Main First 🔄📥
+**MANDATORY** Git workflow rule - ALWAYS pull from origin/main FIRST before any merge operation (IMMUTABLE!):
+
+**Core Rule**:
+- **ALWAYS `git pull origin main` before merging PRs** (IMMUTABLE!)
+- **ALWAYS sync main branch before starting new work** (IMMUTABLE!)
+- **ALWAYS pull after PR merge to sync local main** (IMMUTABLE!)
+- Prevents merge conflicts and divergent branches (IMMUTABLE!)
+
+**The Golden Workflow**:
+```bash
+# BEFORE creating feature branch
+git checkout main
+git pull origin main              # ← RULE 42: ALWAYS PULL FIRST!
+git checkout -b feature/new-work
+
+# BEFORE merging PR (via script or manually)
+git checkout main
+git pull origin main              # ← RULE 42: ALWAYS PULL FIRST!
+gh pr merge <number> --squash --delete-branch
+
+# AFTER merging PR
+git pull origin main              # ← RULE 42: PULL AFTER MERGE!
+```
+
+**Auto-Merge Script Usage**:
+```bash
+# Use auto-merge script (follows RULE 42 automatically)
+./.github/scripts/auto-merge-pr.sh <pr-number> [squash|merge|rebase]
+
+# Example: Auto-merge PR #123 with squash
+./.github/scripts/auto-merge-pr.sh 123 squash
+```
+
+**Auto-Merge GitHub Actions**:
+- Workflow: `.github/workflows/auto-merge.yml`
+- Automatically merges approved PRs with passing checks
+- Follows RULE 42: pulls before AND after merge
+- Squash merges by default for clean history
+
+**Why This Rule Exists**:
+```
+WITHOUT RULE 42:
+Local main (140 commits ahead) ←→ Origin main (19 commits ahead)
+Result: DIVERGENT BRANCHES! Massive merge conflicts! 💥
+
+WITH RULE 42:
+Local main ← (pull) ← Origin main
+Result: CLEAN SYNC! No conflicts! ✅
+```
+
+**Common Scenarios**:
+
+**Scenario 1: Creating new feature branch**
+```bash
+# ❌ WRONG
+git checkout -b feature/new-work  # Main might be outdated!
+
+# ✅ CORRECT (RULE 42)
+git checkout main
+git pull origin main
+git checkout -b feature/new-work
+```
+
+**Scenario 2: Merging PR manually**
+```bash
+# ❌ WRONG
+gh pr merge 123 --squash  # Local main might be outdated!
+
+# ✅ CORRECT (RULE 42)
+git checkout main
+git pull origin main
+gh pr merge 123 --squash --delete-branch
+git pull origin main  # Pull after merge too!
+```
+
+**Scenario 3: Returning to main after feature work**
+```bash
+# After PR is merged on GitHub
+git checkout main
+git pull origin main  # ← RULE 42: Always pull!
+git branch -d feature/old-work  # Clean up merged branch
+```
+
+**Auto-Merge Features**:
+- ✅ Automatically pulls from origin/main BEFORE merge
+- ✅ Automatically pulls from origin/main AFTER merge
+- ✅ Waits for all CI checks to pass
+- ✅ Requires PR approval
+- ✅ Squash merges for clean history
+- ✅ Auto-deletes feature branch after merge
+- ✅ Comments on PR with merge status
+
+**Manual Merge Checklist**:
+```markdown
+- [ ] Checkout main: `git checkout main`
+- [ ] RULE 42: Pull first: `git pull origin main`
+- [ ] Merge PR: `gh pr merge <number> --squash --delete-branch`
+- [ ] RULE 42: Pull after: `git pull origin main`
+- [ ] Verify: `git log --oneline -3`
+```
+
+**Integration with CI/CD**:
+- GitHub Actions auto-merge workflow enabled
+- Runs on PR approval and check completion
+- Enforces RULE 42 automatically
+- Posts status comments to PR
+
+**CRITICAL Pull-First Rules**:
+- ALWAYS pull from origin/main before creating feature branch (IMMUTABLE!)
+- ALWAYS pull from origin/main before merging PR (IMMUTABLE!)
+- ALWAYS pull from origin/main after merging PR (IMMUTABLE!)
+- NEVER merge without syncing main first (IMMUTABLE!)
+- Use auto-merge script/workflow for automatic compliance (RECOMMENDED!)
+
 ---
 
 ## 🎭 SIX IMMUTABLE PERSONALITIES
@@ -717,6 +832,7 @@ git push origin --delete feature/branch-name
 15. ALWAYS use sprint methodology for development work (IMMUTABLE!)
 16. Public CLAUDE.md → `claude-code-master-prompt` repository ONLY (IMMUTABLE!)
 17. ALWAYS create feature branch for new work, NEVER commit to main (IMMUTABLE!)
+18. ALWAYS pull from origin/main before and after PR merge (IMMUTABLE!)
 
 ---
 
