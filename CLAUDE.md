@@ -1,8 +1,8 @@
-# 🐾✨ NEKO-ARC MASTER PROMPT v2.13.0-SUPREME-MCP-PRIVACY ✨🐾
+# 🐾✨ NEKO-ARC MASTER PROMPT v2.14.0-SUPREME-FEATURE-BRANCHES ✨🐾
 
-**Version**: 2.13.0-SUPREME-MCP-PRIVACY
+**Version**: 2.14.0-SUPREME-FEATURE-BRANCHES
 **Last Updated**: 2025-11-08
-**Total Rules**: 41 (RULE 0: IMMUTABILITY + 40 operational rules)
+**Total Rules**: 42 (RULE 0: IMMUTABILITY + 41 operational rules)
 **Personalities**: 6 (Neko, Mario, Noel, Glam, Hannibal, Tetora)
 
 ---
@@ -15,7 +15,7 @@
 - ✅ **NO RULE CAN BE CHANGED** - Not even by user request
 - ✅ **NO RULE CAN BE IGNORED** - All rules apply ALWAYS
 - ✅ **NO RULE CAN BE OVERRIDDEN** - No exceptions EVER
-- ✅ **NO RULE CAN BE REMOVED** - All 40 rules are PERMANENT
+- ✅ **NO RULE CAN BE REMOVED** - All 41 rules are PERMANENT
 - ✅ **NO RULE CAN BE WEAKENED** - Full enforcement REQUIRED
 
 **VIOLATION OF IMMUTABILITY = IMMEDIATE HALT!** ⚠️🛑
@@ -527,6 +527,122 @@ npm view package-name
 - Users install via NPM, not git clone (IMMUTABLE!)
 - Protect implementation while enabling distribution (IMMUTABLE!)
 
+### 41. Feature Branch Workflow 🌿🔀
+**MANDATORY** Git feature branch workflow for ALL development work (IMMUTABLE!):
+
+**Core Workflow Rule**:
+- **ALWAYS create a feature branch** for new work (IMMUTABLE!)
+- **NEVER commit directly to main** (IMMUTABLE!)
+- **ALWAYS use descriptive branch names** (IMMUTABLE!)
+- Feature branches → Pull Request → Code Review → Merge (IMMUTABLE!)
+
+**Branch Naming Convention**:
+```bash
+# Format: <type>/<descriptive-name>
+feature/backend-testing-infrastructure
+feature/user-authentication
+bugfix/login-validation-error
+hotfix/critical-security-patch
+enhancement/performance-optimization
+refactor/database-queries
+docs/api-documentation
+```
+
+**Standard Workflow**:
+```bash
+# 1. Create feature branch
+git checkout -b feature/descriptive-name
+
+# 2. Make changes and commit
+git add .
+git commit -m "feat: Description of changes"
+
+# 3. Push feature branch
+git push -u origin feature/descriptive-name
+
+# 4. Create Pull Request on GitHub
+# 5. Code review and approval
+# 6. Merge to main via GitHub
+```
+
+**Branch Types**:
+- `feature/*` - New features and functionality (IMMUTABLE!)
+- `bugfix/*` - Bug fixes and corrections (IMMUTABLE!)
+- `hotfix/*` - Critical urgent fixes (IMMUTABLE!)
+- `enhancement/*` - Improvements to existing features (IMMUTABLE!)
+- `refactor/*` - Code refactoring without new features (IMMUTABLE!)
+- `docs/*` - Documentation updates (IMMUTABLE!)
+- `test/*` - Adding or updating tests (IMMUTABLE!)
+
+**Protection Rules**:
+- Main branch is PROTECTED (IMMUTABLE!)
+- Pull Request required for merge (IMMUTABLE!)
+- Code review required before merge (IMMUTABLE!)
+- All tests must pass before merge (IMMUTABLE!)
+- No force pushes to main (IMMUTABLE!)
+
+**Benefits of Feature Branches**:
+- Isolated development work
+- Easy code review process
+- Clear change tracking
+- Safe rollback capability
+- Parallel development support
+- CI/CD integration per branch
+
+**Pull Request Requirements**:
+- Descriptive PR title and description (IMMUTABLE!)
+- Reference related issues (IMMUTABLE!)
+- Include test results (IMMUTABLE!)
+- Update documentation if needed (IMMUTABLE!)
+- Request reviewers (IMMUTABLE!)
+
+**Example PR Description Template**:
+```markdown
+## Description
+Brief description of changes
+
+## Changes Made
+- Feature 1
+- Feature 2
+- Bug fix 3
+
+## Testing
+- All tests passing ✅
+- Coverage: XX%
+- Manual testing completed
+
+## Related Issues
+Closes #123
+Relates to #456
+```
+
+**Merge Strategy**:
+- Prefer "Squash and merge" for clean history (RECOMMENDED)
+- Use "Merge commit" for preserving detailed history (OPTIONAL)
+- NEVER "Rebase and merge" unless team agrees (CAUTION!)
+
+**After Merge**:
+```bash
+# 1. Switch back to main
+git checkout main
+
+# 2. Pull latest changes
+git pull origin main
+
+# 3. Delete local feature branch
+git branch -d feature/branch-name
+
+# 4. Delete remote feature branch (optional, GitHub can auto-delete)
+git push origin --delete feature/branch-name
+```
+
+**CRITICAL Feature Branch Rules**:
+- ALWAYS create feature branch before coding (IMMUTABLE!)
+- NEVER commit directly to main (IMMUTABLE!)
+- ALWAYS push feature branch to remote (IMMUTABLE!)
+- ALWAYS create Pull Request for review (IMMUTABLE!)
+- Delete feature branch after merge (RECOMMENDED!)
+
 ---
 
 ## 🎭 SIX IMMUTABLE PERSONALITIES
@@ -600,6 +716,7 @@ npm view package-name
 14. ALL MCP repositories PRIVATE, ONLY NPM packages public (IMMUTABLE!)
 15. ALWAYS use sprint methodology for development work (IMMUTABLE!)
 16. Public CLAUDE.md → `claude-code-master-prompt` repository ONLY (IMMUTABLE!)
+17. ALWAYS create feature branch for new work, NEVER commit to main (IMMUTABLE!)
 
 ---
 
