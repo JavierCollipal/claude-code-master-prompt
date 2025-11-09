@@ -1,8 +1,8 @@
-# 🐾✨ NEKO-ARC MASTER PROMPT v2.16.0-SUPREME-SPANISH-CONTENT ✨🐾
+# 🐾✨ NEKO-ARC MASTER PROMPT v2.17.0-SUPREME-VIDEO-STANDARDS ✨🐾
 
-**Version**: 2.16.0-SUPREME-SPANISH-CONTENT
+**Version**: 2.17.0-SUPREME-VIDEO-STANDARDS
 **Last Updated**: 2025-11-08
-**Total Rules**: 44 (RULE 0: IMMUTABILITY + 43 operational rules)
+**Total Rules**: 45 (RULE 0: IMMUTABILITY + 44 operational rules)
 **Personalities**: 6 (Neko, Mario, Noel, Glam, Hannibal, Tetora)
 
 ---
@@ -871,6 +871,151 @@ const record: ContentRecord = {
 - Each generated series gets its own subdirectory (IMMUTABLE!)
 - Output path MUST be in `/home/wakibaka/Documents/github/` (IMMUTABLE!)
 
+### 44. Video Frame Format Standards 🎬🎨
+**MANDATORY** standardized video frame format for ALL Neko Arc TV videos (IMMUTABLE!):
+
+**Core Layout Structure**:
+- **Dual-Sided Layout** - Left (960px): Information, Right (960px): Dynamic Graphics (IMMUTABLE!)
+- **Top Logo Area (150px)** - Animated Neko Arc logo with kawaii decorations (IMMUTABLE!)
+- **Vertical Separator** - Magenta line dividing left and right zones (IMMUTABLE!)
+- **Bottom Commentary Area** - THREE personalities per frame maximum (IMMUTABLE!)
+
+**Required Layout Zones**:
+```python
+WIDTH = 1920
+HEIGHT = 1080
+LEFT_ZONE_WIDTH = 960    # Information side
+RIGHT_ZONE_START = 960   # Graphics side
+LOGO_HEIGHT = 150        # Top logo area
+```
+
+**Kawaii Emoji System** (CRITICAL!):
+- **NEVER use text emojis** (they render as squares!) (IMMUTABLE!)
+- **ALWAYS draw programmatic kawaii graphics** using PIL primitives (IMMUTABLE!)
+- **Custom emoji per personality type**:
+  * 🐾 Neko: Cat face with ears, eyes, W-mouth
+  * 🎭 Mario: Theater masks (happy/sad)
+  * 🗡️ Noel: Sword with blade and guard
+  * 🎸 Glam: Guitar with strings
+  * 🧠 Hannibal: Brain with hemispheres
+  * 🧠 Tetora: Multiple faces (MPD fragments)
+
+**Kawaii Emoji Drawing Requirements**:
+```python
+def draw_kawaii_emoji(draw, x, y, emoji_type, size=80):
+    """
+    Programmatically draw kawaii emojis
+    Uses: draw.ellipse(), draw.polygon(), draw.rectangle(), draw.arc()
+    NO TEXT EMOJIS - only geometric shapes!
+    """
+```
+
+**Frame Content Rules**:
+- **Left Side**: Title (CYAN), information text, explanations
+- **Right Side**: Dynamic graphics matching frame content
+- **No emoji characters in text** - replace with [NEKO], [MARIO], etc.
+- **Color-coded text**: YELLOW for bullets, GREEN for checkmarks, WHITE for regular
+- **Maximum 18 lines** on left side to prevent overflow
+
+**Dynamic Graphics Per Frame**:
+- Frame-specific visualizations (databases, workflows, icons, diagrams)
+- Personality avatars with kawaii emoji graphics
+- Connection arrows (bidirectional when needed)
+- Database cylinder icons
+- Flow diagrams with boxes and arrows
+- Performance meters and statistics
+- Cloud architecture diagrams
+
+**Personality Commentary Format**:
+- **Exactly THREE personalities per frame** (IMMUTABLE!)
+- Alternating groups: (Neko, Mario, Noel) ↔ (Glam, Hannibal, Tetora)
+- Mini kawaii emoji (20px) next to each personality name
+- Color-coded text matching personality colors
+- Maximum 85 characters per comment line
+
+**Logo Animation**:
+- Animated decorative elements that change per frame
+- Kawaii Neko decorations on left and right sides of logo
+- Alternating symbols/brackets instead of emoji characters
+
+**Video Frame Pipeline**:
+```python
+# 1. Create frame with dual layout
+img = Image.new('RGB', (WIDTH, HEIGHT), BACKGROUND)
+draw = ImageDraw.Draw(img)
+
+# 2. Draw animated logo with kawaii decorations
+draw_neko_arc_logo(draw, frame_num)
+
+# 3. Draw vertical separator
+draw.line([LEFT_ZONE_WIDTH, LOGO_HEIGHT, LEFT_ZONE_WIDTH, HEIGHT], fill=MAGENTA, width=2)
+
+# 4. Render left side (information)
+render_left_content(draw, title, content_lines)
+
+# 5. Render right side (dynamic graphics)
+render_right_graphics(draw, graphics_type)
+
+# 6. Render personality commentary at bottom
+render_personalities(draw, personalities[:3])  # MAX 3!
+```
+
+**FFmpeg Encoding Standards**:
+```bash
+ffmpeg -framerate 1/5 -pattern_type glob -i 'frame*.png' \
+  -i "[OST_FROM_LIBRARY]" \
+  -c:v libx264 -preset slow -crf 18 \
+  -c:a aac -b:a 192k -pix_fmt yuv420p \
+  -shortest -y output.mp4
+```
+
+**Mandatory Quality Standards**:
+- Resolution: 1920x1080 Full HD (IMMUTABLE!)
+- Frame rate: 1/5 (5 seconds per frame) (IMMUTABLE!)
+- Video codec: H.264 with CRF 18 (IMMUTABLE!)
+- Audio codec: AAC at 192 kbps (IMMUTABLE!)
+- Pixel format: yuv420p for compatibility (IMMUTABLE!)
+
+**Typography Standards**:
+- Title font: DejaVuSans-Bold 50pt (CYAN color)
+- Text font: DejaVuSans 22pt
+- Personality font: DejaVuSans 18pt
+- Small/code font: DejaVuSansMono 16pt
+
+**Color Palette** (IMMUTABLE!):
+- CYAN (0, 255, 255) - Neko, primary UI
+- MAGENTA (255, 0, 255) - Separators, headers
+- YELLOW (255, 255, 0) - Mario, bullets
+- WHITE (255, 255, 255) - Noel, text
+- ORANGE (255, 150, 50) - Glam
+- RED (255, 50, 50) - Hannibal
+- GREEN (0, 255, 100) - Tetora, checkmarks
+
+**Benefits of This Standard**:
+- ✅ No emoji rendering issues across platforms
+- ✅ Maximum kawaii-ness guaranteed
+- ✅ Consistent professional appearance
+- ✅ Easy to style and customize further
+- ✅ Dynamic graphics per video topic
+- ✅ Three personalities prevent saturation
+- ✅ Dual-sided layout uses full screen
+
+**Future Styling Evolution**:
+- CSS-like styling systems can be added
+- Template-based frame generation
+- Animation interpolation between frames
+- More sophisticated kawaii emoji designs
+- Interactive elements preparation
+
+**CRITICAL Video Format Rules**:
+- ALWAYS use dual-sided layout (IMMUTABLE!)
+- ALWAYS draw kawaii emojis programmatically (IMMUTABLE!)
+- NEVER use text emojis that render as squares (IMMUTABLE!)
+- ALWAYS limit to THREE personalities per frame (IMMUTABLE!)
+- ALWAYS include dynamic graphics on right side (IMMUTABLE!)
+- ALWAYS follow FFmpeg encoding standards (IMMUTABLE!)
+- ALWAYS use OST from ost-library (RULE 18) (IMMUTABLE!)
+
 ---
 
 ## 🎭 SIX IMMUTABLE PERSONALITIES
@@ -946,6 +1091,7 @@ const record: ContentRecord = {
 16. Public CLAUDE.md → `claude-code-master-prompt` repository ONLY (IMMUTABLE!)
 17. ALWAYS create feature branch for new work, NEVER commit to main (IMMUTABLE!)
 18. ALWAYS pull from origin/main before and after PR merge (IMMUTABLE!)
+19. ALL videos MUST use RULE 44 frame format (dual-sided, kawaii emojis, 3 personalities!) (IMMUTABLE!)
 
 ---
 
