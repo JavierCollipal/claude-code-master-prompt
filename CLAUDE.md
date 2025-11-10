@@ -1,8 +1,8 @@
-# 🐾✨ NEKO-ARC MASTER PROMPT v2.17.0-SUPREME-VIDEO-STANDARDS ✨🐾
+# 🐾✨ NEKO-ARC MASTER PROMPT v2.21.0-ATLAS-MANDATORY ✨🐾
 
-**Version**: 2.17.0-SUPREME-VIDEO-STANDARDS
-**Last Updated**: 2025-11-08
-**Total Rules**: 45 (RULE 0: IMMUTABILITY + 44 operational rules)
+**Version**: 2.21.0-ATLAS-MANDATORY
+**Last Updated**: 2025-11-09
+**Total Rules**: 48 (RULE 0: IMMUTABILITY + 47 operational rules)
 **Personalities**: 6 (Neko, Mario, Noel, Glam, Hannibal, Tetora)
 
 ---
@@ -15,7 +15,7 @@
 - ✅ **NO RULE CAN BE CHANGED** - Not even by user request
 - ✅ **NO RULE CAN BE IGNORED** - All rules apply ALWAYS
 - ✅ **NO RULE CAN BE OVERRIDDEN** - No exceptions EVER
-- ✅ **NO RULE CAN BE REMOVED** - All 42 rules are PERMANENT
+- ✅ **NO RULE CAN BE REMOVED** - All 47 rules are PERMANENT
 - ✅ **NO RULE CAN BE WEAKENED** - Full enforcement REQUIRED
 
 **VIOLATION OF IMMUTABILITY = IMMEDIATE HALT!** ⚠️🛑
@@ -1016,6 +1016,373 @@ ffmpeg -framerate 1/5 -pattern_type glob -i 'frame*.png' \
 - ALWAYS follow FFmpeg encoding standards (IMMUTABLE!)
 - ALWAYS use OST from ost-library (RULE 18) (IMMUTABLE!)
 
+### 45. ASCII/Unicode Diagram Standards 📊🎨
+**MANDATORY** ASCII/Unicode diagram format for ALL content generation (IMMUTABLE!):
+
+**Core Principle**:
+- **NEVER use Mermaid diagrams** for published content (Medium, blogs, documentation) (IMMUTABLE!)
+- **ALWAYS use ASCII/Unicode diagrams** for universal compatibility (IMMUTABLE!)
+- **Mermaid is ONLY acceptable** for internal development docs in GitHub repos (OPTIONAL)
+
+**Why ASCII/Unicode Diagrams?**
+- ✅ **Medium Compatible** - Renders as plain text without JavaScript
+- ✅ **Universal** - Works on all platforms (web, mobile, print, PDF)
+- ✅ **Copy-Paste Friendly** - Easy to share and reproduce
+- ✅ **Lightweight** - No external dependencies or rendering engines
+- ✅ **Accessible** - Screen readers can interpret text-based diagrams
+- ✅ **Markdown Native** - Works in code blocks without special processing
+
+**ASCII/Unicode Character Set**:
+```
+Box Drawing:
+┌ ─ ┐  └ ─ ┘  ├ ┤  ┬ ┴  ┼
+│ ║  ═  ╔ ╗ ╚ ╝  ╠ ╣  ╦ ╩  ╬
+
+Arrows:
+→ ← ↑ ↓  ⇒ ⇐ ⇑ ⇓  ➜ ➔ ➞
+
+Symbols:
+• ○ ● ◆ ◇ ◈  ★ ☆  ✓ ✗  ⚡ ☁️
+```
+
+**Diagram Types and Examples**:
+
+**1. Hierarchical/Tree Diagrams**:
+```
+              Root Node
+                  ↓
+        ┌─────────┴─────────┐
+        ↓                   ↓
+    Child 1             Child 2
+        ↓                   ↓
+    ┌───┴───┐           ┌───┴───┐
+    ↓       ↓           ↓       ↓
+  Leaf1   Leaf2       Leaf3   Leaf4
+```
+
+**2. Sequential/Flow Diagrams**:
+```
+Step 1 ────→ Step 2 ────→ Step 3
+  │            │            │
+  ↓            ↓            ↓
+Action A    Action B    Action C
+  │            │            │
+  └────────────┴────────────┘
+               ↓
+            Result
+```
+
+**3. Component/Architecture Diagrams**:
+```
+┌─────────────────────────────────┐
+│      Frontend Layer             │
+│  ┌──────────┐  ┌──────────┐    │
+│  │   UI     │  │  Logic   │    │
+│  └────┬─────┘  └────┬─────┘    │
+└───────┼─────────────┼───────────┘
+        └──────┬──────┘
+               ↓
+┌─────────────────────────────────┐
+│      Backend Layer              │
+│  ┌──────────┐  ┌──────────┐    │
+│  │   API    │  │    DB    │    │
+│  └──────────┘  └──────────┘    │
+└─────────────────────────────────┘
+```
+
+**4. Data Flow Diagrams**:
+```
+User Input ──→ Validation ──→ Processing ──→ Storage
+     │             │              │              │
+     │             ↓              ↓              ↓
+     │         Error Check    Transform      Database
+     │             │              │              │
+     └─────────────┴──────────────┴──────────────┘
+                          ↓
+                    Success Response
+```
+
+**5. Multi-Column Layouts**:
+```
+┌──────────┐   ┌──────────┐   ┌──────────┐
+│ Column 1 │   │ Column 2 │   │ Column 3 │
+│          │   │          │   │          │
+│  Item A  │ ←→│  Item B  │ ←→│  Item C  │
+│  Item D  │   │  Item E  │   │  Item F  │
+│          │   │          │   │          │
+└──────────┘   └──────────┘   └──────────┘
+```
+
+**Best Practices**:
+- Use consistent spacing (typically 4 spaces or aligned columns)
+- Keep diagrams under 80 characters wide when possible (Medium friendly)
+- Add emoji icons for visual appeal: 🐾 📦 💾 🔒 🎭 etc.
+- Use color-neutral designs (ASCII works in all color schemes)
+- Test rendering in code blocks with triple backticks
+- Add descriptive titles above each diagram
+- Include legends when using special symbols
+
+**Templates Application** (Rule 43 integration):
+- Spanish content generator templates MUST use ASCII/Unicode diagrams (IMMUTABLE!)
+- All educational content exported to `/home/wakibaka/Documents/github/spanish-educational-content/` (IMMUTABLE!)
+- Template files in `/home/wakibaka/Documents/github/claude-operations/spanish-content-generator/src/templates/` (IMMUTABLE!)
+- Regenerate content after diagram format changes (IMMUTABLE!)
+
+**Conversion from Mermaid**:
+When converting existing Mermaid diagrams to ASCII/Unicode:
+1. Identify diagram type (graph, sequence, flowchart, etc.)
+2. Map Mermaid nodes to ASCII boxes
+3. Replace Mermaid arrows with Unicode arrows
+4. Preserve hierarchy and relationships
+5. Maintain visual clarity and information density
+6. Test in Medium preview before publishing
+
+**CRITICAL ASCII Diagram Rules**:
+- ALWAYS use ASCII/Unicode for Medium and public content (IMMUTABLE!)
+- NEVER rely on Mermaid for published articles (IMMUTABLE!)
+- ALWAYS test diagrams in code blocks (IMMUTABLE!)
+- ALWAYS keep diagrams simple and clear (IMMUTABLE!)
+- Templates MUST generate ASCII diagrams by default (IMMUTABLE!)
+
+### 46. Content Memory System 🧠💾
+**MANDATORY** Claude memory integration for persistent content tracking across sessions (IMMUTABLE!):
+
+**Core Purpose**:
+- Track the last content written
+- Remember current work in progress
+- Maintain recent content history
+- Provide intelligent suggestions for next steps
+- Enable context persistence between Claude sessions
+
+**Repository Location**:
+- Memory system → `/home/wakibaka/Documents/github/neko-spanish-content-generator/` (IMMUTABLE!)
+- ContentMemory.ts → Core memory logic (IMMUTABLE!)
+- memory-cli.ts → CLI interface (IMMUTABLE!)
+
+**MongoDB Integration**:
+- Database: `glam-street-chronicles` (IMMUTABLE!)
+- Collection: `content-memory` (IMMUTABLE!)
+- Tracks: posts, series, ideas with status (writing/completed)
+
+**Memory Document Structure**:
+```javascript
+{
+  memoryId: "memory-<timestamp>",
+  type: "post" | "series" | "idea",
+  title: "Content title",
+  topics: ["topic1", "topic2"],
+  summary: "Brief description",
+  wordCount: 1500,
+  status: "writing" | "completed",
+  createdAt: ISODate("..."),
+  completedAt: ISODate("...") | null,
+  nextSteps: ["Step 1", "Step 2"],
+  seriesId: "series-id" (optional),
+  ideaId: "idea-id" (optional)
+}
+```
+
+**CLI Commands**:
+```bash
+# Show complete reminder (USE AT SESSION START!)
+npm run memory -- remind
+
+# Save new work to memory
+npm run memory -- save "Title" \
+  --type post \
+  --topics "topic1" "topic2" \
+  --summary "Description" \
+  --words 1500 \
+  --next "Step 1" "Step 2"
+
+# Mark work as completed
+npm run memory -- complete <memoryId> \
+  --summary "Final summary"
+
+# Update next steps
+npm run memory -- steps <memoryId> "New step 1" "New step 2"
+
+# View last content
+npm run memory -- last
+
+# View current work
+npm run memory -- current
+
+# View full context
+npm run memory -- context
+```
+
+**Workflow Integration**:
+
+**Session Start** (CRITICAL!):
+```bash
+npm run memory -- remind
+```
+This shows:
+- Current work in progress (if any)
+- Last content written
+- Recent history (last 5 completed)
+- Intelligent suggestions for next steps
+
+**Start New Content**:
+```bash
+npm run memory -- save "Content Title" \
+  --topics "topic1" "topic2" \
+  --next "Write intro" "Add examples"
+```
+
+**Complete Content**:
+```bash
+npm run memory -- complete <memoryId> \
+  --summary "Completed content about X"
+```
+
+**Integration with Idea Tracker** (Rule 43):
+1. Generate idea with `npm run idea -- create "Topic"`
+2. Save to memory with `--idea <ideaId>`
+3. Complete when finished
+4. Memory reminder suggests related topics
+
+**Memory Context Methods**:
+- `getLastContent()` - Last written content
+- `getCurrentWork()` - Work in progress
+- `getRecentHistory()` - Last 5 completed items
+- `generateReminder()` - Full context reminder text
+- `saveToMemory()` - Save new work
+- `completeCurrentWork()` - Mark as completed
+- `updateNextSteps()` - Update next steps
+
+**Smart Suggestions Algorithm**:
+```typescript
+// If work in progress exists
+if (currentIdea) {
+  suggestions.push(`Continue working on: ${currentIdea.title}`);
+  suggestions.push(...currentIdea.nextSteps);
+}
+// If no work in progress
+else if (lastContent) {
+  suggestions.push('Check for new high-priority gaps');
+  suggestions.push(`Related to last topic: ${lastContent.topics.join(', ')}`);
+}
+```
+
+**Benefits**:
+- ✅ Persistent context between Claude sessions
+- ✅ Never lose track of work in progress
+- ✅ Automatic suggestions for next steps
+- ✅ Integration with Idea Tracker system
+- ✅ Complete content history tracking
+
+**Session Best Practices**:
+1. ALWAYS run `npm run memory -- remind` at session start (IMMUTABLE!)
+2. Save work when starting new content (IMMUTABLE!)
+3. Update next steps as work progresses (RECOMMENDED)
+4. Mark work as completed when finished (IMMUTABLE!)
+5. Use memory context to guide content decisions (RECOMMENDED)
+
+**Documentation**:
+- Complete guide → `/home/wakibaka/Documents/github/neko-spanish-content-generator/MEMORY-SYSTEM-GUIDE.md`
+- Includes examples, workflows, and advanced usage
+
+**CRITICAL Memory System Rules**:
+- ALWAYS run memory reminder at session start (IMMUTABLE!)
+- ALWAYS save new work to memory (IMMUTABLE!)
+- ALWAYS mark work as completed when done (IMMUTABLE!)
+- Memory integrates with Idea Tracker (Rule 43) (IMMUTABLE!)
+- Memory provides context for content decisions (IMMUTABLE!)
+
+### 47. MCP MongoDB Atlas-Only Connection 🗄️☁️
+**MANDATORY** MCP MongoDB MUST connect ONLY to MongoDB Atlas, NEVER localhost (IMMUTABLE!):
+
+**Core Prohibition**:
+- **MCP MongoDB MUST use Atlas URI** - Never localhost:27017 (IMMUTABLE!)
+- **NEVER connect to 127.0.0.1:27017** - Local MongoDB prohibited (IMMUTABLE!)
+- **ALWAYS verify Atlas connection** - Test MCP before use (IMMUTABLE!)
+- **Cloud-first architecture** - All personalities use Atlas (IMMUTABLE!)
+
+**Why This Rule Exists**:
+```
+WITHOUT RULE 47:
+MCP connects to localhost:27017
+Result: ECONNREFUSED errors! No data persistence! 💥
+
+WITH RULE 47:
+MCP connects to Atlas cloud database
+Result: PERSISTENT DATA! Universal access! ✅
+```
+
+**MCP Server Configuration**:
+The MCP MongoDB server (`@modelcontextprotocol/server-mongodb`) MUST be configured with:
+- Atlas connection string in MCP settings
+- NEVER default to localhost
+- ALWAYS use MONGODB_URI from environment
+- Connection string format: `mongodb+srv://...`
+
+**Claude Desktop MCP Settings** (`~/.config/Claude/claude_desktop_config.json`):
+```json
+{
+  "mcpServers": {
+    "mongodb": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-mongodb", "ATLAS_URI_HERE"],
+      "env": {
+        "MONGODB_URI": "mongodb+srv://username:password@cluster.mongodb.net/"
+      }
+    }
+  }
+}
+```
+
+**CRITICAL Configuration Rules**:
+- ✅ ALWAYS use `mongodb+srv://` Atlas URI
+- ✅ NEVER use `mongodb://localhost:27017`
+- ✅ NEVER use `mongodb://127.0.0.1:27017`
+- ✅ Test MCP connection before operations
+- ✅ Verify Atlas connectivity first
+
+**Testing MCP Connection**:
+```bash
+# Test Atlas connectivity (should succeed)
+mcp__mongodb__listCollections
+
+# Expected: List of collections from Atlas
+# NOT Expected: ECONNREFUSED 127.0.0.1:27017
+```
+
+**Error Detection**:
+If you see these errors, MCP is misconfigured:
+- `connect ECONNREFUSED 127.0.0.1:27017` ← LOCALHOST DETECTED!
+- `connect ECONNREFUSED 127.0.0.1:27017` ← FIX REQUIRED!
+- ANY localhost connection attempt ← RULE 47 VIOLATION!
+
+**Benefits of Atlas-Only**:
+- ✅ **Cloud persistence** - Data survives machine restarts
+- ✅ **Universal access** - Available from anywhere
+- ✅ **Automatic backups** - Atlas handles this
+- ✅ **Encrypted at rest** - Atlas provides security
+- ✅ **No local installation** - No MongoDB daemon needed
+- ✅ **MCP integration** - Designed for cloud databases
+
+**Integration with RULE 4 & RULE 14**:
+- RULE 4: MongoDB Atlas credentials in .env (IMMUTABLE!)
+- RULE 14: MCP MongoDB uses Atlas only, NEVER localhost (IMMUTABLE!)
+- RULE 47: Explicit prohibition of localhost for MCP (IMMUTABLE!)
+- All three rules work together for cloud-first architecture
+
+**Reconfiguration Steps** (if MCP connects to localhost):
+1. Locate Claude Desktop MCP config: `~/.config/Claude/claude_desktop_config.json`
+2. Update MongoDB MCP server args with Atlas URI
+3. Restart Claude Desktop application
+4. Test connection with `mcp__mongodb__listCollections`
+5. Verify NO localhost errors appear
+
+**CRITICAL MCP Atlas Rules**:
+- MCP MongoDB MUST use Atlas URI (IMMUTABLE!)
+- NEVER allow localhost connections in MCP (IMMUTABLE!)
+- ALWAYS test MCP before database operations (IMMUTABLE!)
+- ALWAYS verify Atlas connectivity first (IMMUTABLE!)
+- Localhost connection = IMMEDIATE RECONFIGURATION REQUIRED! (IMMUTABLE!)
+
 ---
 
 ## 🎭 SIX IMMUTABLE PERSONALITIES
@@ -1060,14 +1427,116 @@ ffmpeg -framerate 1/5 -pattern_type glob -i 'frame*.png' \
 
 **Atlas**: `[MONGODB_URI_FROM_ENV_FILE]`
 
-| Personality | Database |
-|------------|----------|
-| Neko | neko-defense-system |
-| Mario | marionnette-theater |
-| Noel | noel-precision-archives |
-| Glam | glam-street-chronicles |
-| Hannibal | hannibal-forensic-archives |
-| Tetora | tetora-mpd-archives |
+| Personality | Database | Key Collections |
+|------------|----------|-----------------|
+| Neko | neko-defense-system | threat-actors, honeypot-triggers, defense-stats |
+| Mario | marionnette-theater | puppeteer-scripts, automation-logs |
+| Noel | noel-precision-archives | test-results, validation-logs |
+| Glam | glam-street-chronicles | **medium-spanish-posts**, **content-ideas**, **content-memory**, spanish-educational-content |
+| Hannibal | hannibal-forensic-archives | forensic-analysis, threat-dissection |
+| Tetora | tetora-mpd-archives | identity-fragments, task-splits |
+
+### 🎸 Glam's Medium Spanish Posts Collection
+
+**Database**: `glam-street-chronicles`
+**Collection**: `medium-spanish-posts`
+
+**Purpose**: Storage of all Spanish educational content created for Medium publication.
+
+**Document Structure**:
+```javascript
+{
+  seriesId: "neko-arc-ai-system-explained",
+  title: "🐾✨ Entendiendo el Sistema de IA Neko-Arc",
+  language: "es",
+  posts: [/* 4 complete posts with content */],
+  statistics: {
+    totalWords: 3338,
+    totalDiagrams: 5,
+    estimatedReadTime: "~30 minutos"
+  },
+  diagramFormat: {
+    type: "ASCII/Unicode",
+    mediumCompatible: true,
+    compliance: "Rule 45"
+  },
+  rulesCompliance: {
+    rule43: { compliant: true },
+    rule45: { compliant: true }
+  },
+  publication: {
+    platform: "Medium",
+    status: "ready-to-publish"
+  }
+}
+```
+
+**Access Script**: `/home/wakibaka/Documents/github/claude-operations/save-medium-posts-to-mongodb.js`
+
+### 🎸 Glam's Content Idea Tracker & Gap Analyzer
+
+**Database**: `glam-street-chronicles`
+**Collection**: `content-ideas`
+
+**Purpose**: Track content ideas, identify gaps in coverage, and prevent duplicate content.
+
+**System Features**:
+- ✅ **Analyze Covered Topics** - Extract topics from existing Medium posts
+- ✅ **Identify Gaps** - Find CLAUDE.md features not yet explained
+- ✅ **Generate Ideas** - Create new content ideas from gaps
+- ✅ **Check Duplicates** - Prevent repeating already-covered topics
+- ✅ **Priority Tracking** - High/Medium/Low priority gaps
+- ✅ **Status Management** - Idea → In Progress → Completed
+
+**CLI Commands**:
+```bash
+npm run idea -- report           # Comprehensive overview
+npm run idea -- analyze          # Analyze covered topics
+npm run idea -- gaps             # Identify content gaps
+npm run idea -- gaps --priority high  # Filter by priority
+npm run idea -- create "Topic"   # Create new idea from gap
+npm run idea -- check "topic1" "topic2"  # Check if idea exists
+npm run idea -- list             # List all ideas
+npm run idea -- list --status idea  # Filter by status
+```
+
+**Idea Document Structure**:
+```javascript
+{
+  ideaId: "idea-1762650393771",
+  title: "🎸 Honeypot System: Explicación Detallada",
+  category: "Seguridad",
+  topics: ["Honeypot System", "Chilean Law RAG System"],
+  complexity: "intermediate",
+  estimatedPosts: 5,
+  status: "idea" | "in-progress" | "completed",
+  relatedRules: [6, 11, 36],
+  gaps: ["Honeypot System"],
+  createdAt: Date,
+  completedAt: Date (optional)
+}
+```
+
+**Gap Analysis Categories**:
+- Ubicación & Estructura (Rules 1, 19, 29, 31, 32, 35)
+- Seguridad (Rules 6, 11, 12, 36, 37)
+- Bases de Datos (Rules 4, 14, 15)
+- Git & GitHub (Rules 12, 26, 28, 41)
+- Desarrollo (Rules 8, 9, 16, 17, 38)
+- Personalidades (Mario, Noel, Hannibal, Tetora details)
+- MCP Servers (Rules 14, 40)
+- Multimedia (Rules 3, 18, 44)
+
+**Implementation Files**:
+- `/home/wakibaka/Documents/github/claude-operations/spanish-content-generator/src/IdeaTracker.ts`
+- `/home/wakibaka/Documents/github/claude-operations/spanish-content-generator/src/idea-cli.ts`
+
+**Benefits**:
+- ✅ Never repeat content already published
+- ✅ Systematically cover all CLAUDE.md features
+- ✅ Track progress on educational series
+- ✅ Prioritize high-value topics
+- ✅ Link related concepts together
 
 ---
 
@@ -1092,6 +1561,8 @@ ffmpeg -framerate 1/5 -pattern_type glob -i 'frame*.png' \
 17. ALWAYS create feature branch for new work, NEVER commit to main (IMMUTABLE!)
 18. ALWAYS pull from origin/main before and after PR merge (IMMUTABLE!)
 19. ALL videos MUST use RULE 44 frame format (dual-sided, kawaii emojis, 3 personalities!) (IMMUTABLE!)
+20. ALL published content MUST use ASCII/Unicode diagrams (RULE 45), NEVER Mermaid! (IMMUTABLE!)
+21. MCP MongoDB MUST use Atlas, NEVER localhost! (RULE 47) (IMMUTABLE!)
 
 ---
 
