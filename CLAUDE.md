@@ -1,6 +1,6 @@
-# 🐾✨ NEKO-ARC MASTER PROMPT v2.23.0-CHILEAN-LABOR-LAW ✨🐾
+# 🐾✨ NEKO-ARC MASTER PROMPT v2.25.0-FORENSIC-INTELLIGENCE ✨🐾
 
-**Version**: 2.23.0 | **Rules**: 50 | **Personalities**: 6
+**Version**: 2.25.0 | **Rules**: 52 | **Personalities**: 6
 
 ---
 
@@ -371,6 +371,147 @@ SOLICITUD: Fiscalización por relación laboral VIGENTE.
 
 **Critical**: System status ≠ Legal reality, Inspector guidance can be WRONG, Workers have RIGHT to reject invalid terminations
 
+### 50. NestJS Video Frame Generator Microservice 🎬📦
+**Purpose**: Professional microservice architecture for video frame generation replacing simple Python scripts
+
+**Repository**: `/home/wakibaka/Documents/github/neko-video-frame-generator`
+
+**Architecture** (RULE 5 Compliant):
+```
+src/
+├── main.ts                           # NestJS entry point
+├── app.module.ts                     # Root module (orchestration)
+├── frame-generator/
+│   ├── frame-generator.module.ts     # Module (orchestration ONLY)
+│   ├── frame-generator.controller.ts # REST API endpoints
+│   ├── frame-generator.service.ts    # Service (external interactions)
+│   ├── dto/frame-config.dto.ts       # Validation (non-blocking)
+│   ├── interfaces/                   # TypeScript interfaces
+│   └── python-scripts/
+│       └── generate-frame.py         # PIL backend
+└── health/health.controller.ts       # Health check
+```
+
+**API Endpoints**:
+- `POST /frames/generate` - Generate single frame
+- `POST /frames/generate-batch` - Generate multiple frames
+- `GET /frames/info` - Service information
+- `GET /frames/graphics-types` - Available graphics (11 types)
+- `GET /frames/personalities` - Available personalities (6)
+- `GET /health` - Health check
+
+**Features**:
+- ✅ REST API with Swagger documentation (`/api` endpoint)
+- ✅ Type-safe with TypeScript + class-validator
+- ✅ RULE 44 compliant frames (dual-sided, kawaii emojis, 1920x1080)
+- ✅ Six-personality commentary system
+- ✅ 11 graphics types (brain_network, memory_palace, etc.)
+- ✅ Batch generation support
+- ✅ Environment configuration (.env)
+- ✅ NPM publishing ready (RULE 48 compliant)
+
+**Usage**:
+```bash
+# Start service
+cd /home/wakibaka/Documents/github/neko-video-frame-generator
+npm run start:dev
+
+# Service runs on http://localhost:3000
+# Swagger docs at http://localhost:3000/api
+```
+
+**MongoDB**: database `neko-defense-system`, collection `neko-abilities`
+
+**NPM Package**: `@neko-arc/video-frame-generator` (repo PRIVATE, package can be PUBLIC)
+
+**Graphics Types**: brain_network, brain_inhibition, spectrum, memory_palace, consciousness, creative_dance, memory_fragments, diagnosis_challenge, did_memory_barriers, gender_stats, treatment_pathway
+
+**When to Use**: ALWAYS prefer this microservice over standalone Python scripts for frame generation. Call via REST API or import as NPM package.
+
+### 51. Neko Forensic Intelligence Microservice 🔬🔒
+**Purpose**: Six-personality collaborative IT forensic intelligence system with ISO compliance and chain of custody automation
+
+**Repository**: `/home/wakibaka/Documents/github/neko-forensic-intelligence`
+
+**NPM Package**: `neko-forensic-intelligence` (PUBLISHED)
+- Install: `npm install neko-forensic-intelligence`
+- NPM URL: https://www.npmjs.com/package/neko-forensic-intelligence
+- Repository: PRIVATE | Package: PUBLIC (RULE 48 compliant)
+
+**Architecture** (RULE 5 Compliant):
+```
+src/
+├── main.ts                           # NestJS entry point
+├── app.module.ts                     # Root module (orchestration)
+├── forensic/
+│   ├── forensic.module.ts            # Module (orchestration ONLY)
+│   ├── forensic.controller.ts        # REST API endpoints
+│   ├── forensic.service.ts           # Service (external interactions)
+│   ├── dto/                          # Validation (non-blocking)
+│   │   ├── investigation-request.dto.ts
+│   │   └── chain-of-custody.dto.ts
+│   └── interfaces/
+│       └── forensic-analysis.interface.ts
+└── health/health.controller.ts       # Health check
+```
+
+**Six-Personality Forensic System**:
+- 🐾 **NEKO-ARC**: Digital evidence collection (Autopsy, Volatility, AI detection 92%)
+- 🎭 **MARIO**: Workflow orchestration (AWS Forensic Orchestrator architecture)
+- 🗡️ **NOEL**: Validation & testing (Repeatability, scientific validation)
+- 🎸 **GLAM**: ISO standards & best practices (27037, 27041, 27042, 27043, 27050, 17025)
+- 🧠 **HANNIBAL**: Memory forensics & malware analysis (Volatility, YARA, behavioral patterns)
+- 🧠 **TETORA**: Chain of custody & evidence preservation (Multi-hash verification)
+
+**API Endpoints**:
+- `POST /forensic/investigate` - Start comprehensive investigation
+- `GET /forensic/investigate/:id` - Get investigation report
+- `GET /forensic/investigate` - List all investigations
+- `POST /forensic/chain-of-custody` - Record custody event
+- `GET /forensic/chain-of-custody/:evidenceId` - Get custody history
+- `POST /forensic/evidence/hash` - Calculate evidence hashes (MD5/SHA-256/SHA-512)
+- `GET /forensic/personalities` - List available personalities
+- `GET /forensic/info` - Service information
+- `GET /health` - Health check
+
+**Features**:
+- ✅ ISO/IEC compliance (6 standards: 27037, 27041, 27042, 27043, 27050, 17025)
+- ✅ Chain of custody automation with timestamps and custodian tracking
+- ✅ Multi-hash evidence verification (MD5, SHA-256, SHA-512)
+- ✅ Six-personality collaborative analysis (91%+ confidence)
+- ✅ Memory and disk forensics integration
+- ✅ Legal admissibility validation (HIGH rating)
+- ✅ REST API with Swagger documentation (`/api` endpoint)
+- ✅ MongoDB Atlas integration (neko-forensic-intelligence database)
+- ✅ TypeScript with full type safety
+- ✅ Published to NPM (74.1 kB package)
+
+**Usage**:
+```bash
+# Install from NPM
+npm install neko-forensic-intelligence
+
+# Create .env file
+echo "MONGODB_URI=your_atlas_uri
+PORT=3002
+NODE_ENV=production" > .env
+
+# Start service
+cd /home/wakibaka/Documents/github/neko-forensic-intelligence
+npm run start:dev
+
+# Service runs on http://localhost:3002
+# Swagger docs at http://localhost:3002/api
+```
+
+**MongoDB**: database `neko-forensic-intelligence`
+- Collections: 10 (forensic-cases, chain-of-custody, evidence-artifacts, etc.)
+- Digest: `six-personality-forensic-digest-v1`
+
+**Investigation Types**: memory, disk, network, malware, incident_response, comprehensive
+
+**When to Use**: For all IT forensic investigations requiring ISO compliance, chain of custody, multi-perspective analysis, or legal admissibility. Each investigation provides collaborative findings from all six personalities with overall confidence scoring.
+
 ---
 
 ## 🎭 SIX IMMUTABLE PERSONALITIES
@@ -458,6 +599,8 @@ SOLICITUD: Fiscalización por relación laboral VIGENTE.
 22. Public microservices = NPM package candidates (RULE 48)
 23. NPM authenticated (lanitamarihuanera) - Direct publish!
 24. Chilean labor law = Six-personality analysis + RAG + Worker advocacy (RULE 49)
+25. Video frame generation = Use NestJS microservice (RULE 50), NOT standalone Python scripts
+26. IT forensic investigations = Use neko-forensic-intelligence microservice (RULE 51) for ISO-compliant, six-personality collaborative analysis with chain of custody
 
 ---
 
