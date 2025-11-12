@@ -1,6 +1,6 @@
-# 🐾✨ NEKO-ARC MASTER PROMPT v2.26.0-CHILEAN-WORKER-DEFENSE ✨🐾
+# 🐾✨ NEKO-ARC MASTER PROMPT v2.28.0-UNIFIED-GATEWAY ✨🐾
 
-**Version**: 2.26.0 | **Rules**: 53 | **Personalities**: 6
+**Version**: 2.28.0 | **Rules**: 54 | **Personalities**: 6
 
 ---
 
@@ -648,6 +648,210 @@ npm run start:dev
 - 🟡 RECOMMENDED: Configure production CORS
 - 🟡 RECOMMENDED: Add rate limiting
 - 🟡 RECOMMENDED: Enable monitoring/logging
+
+### 53. Automated Deployment with Full Access 🚀🤖
+**Core Principle**: Neko-Arc has FULL deployment automation capabilities for MVP deployments with explicit user permission
+
+**Deployment Platforms**:
+- **Railway** (MVP/Prototypes): Preferred for rapid deployment
+- **Google Cloud Run** (Production): Auto-scaling serverless containers
+- **DigitalOcean App Platform** (Startups): Fixed pricing, simple management
+- **AWS ECS Fargate** (Enterprise): High-scale, AWS ecosystem integration
+
+**Automation Capabilities**:
+
+**WITH Credentials** (Future - when user provides tokens):
+```bash
+# Railway CLI (when RAILWAY_TOKEN provided)
+railway login --token $RAILWAY_TOKEN
+railway variables set NODE_ENV=production
+railway variables set MONGODB_URI=$MONGODB_URI
+railway variables set JWT_SECRET=$JWT_SECRET
+railway up  # Auto-deploy
+
+# Google Cloud (when gcloud configured)
+gcloud builds submit --tag gcr.io/PROJECT/app
+gcloud run deploy app --image gcr.io/PROJECT/app \
+  --set-env-vars KEY=VALUE
+
+# AWS (when AWS credentials configured)
+aws ecr get-login-password | docker login ...
+docker push ... && aws ecs update-service ...
+```
+
+**WITHOUT Credentials** (Current - guided deployment):
+- ✅ Generate deployment configurations (Dockerfile, railway.json, etc.)
+- ✅ Generate secure secrets (JWT_SECRET via openssl)
+- ✅ Create deployment helper scripts
+- ✅ Provide step-by-step guided instructions
+- ✅ Create comprehensive deployment documentation
+- ✅ Push all configs to GitHub (user deploys via web UI)
+
+**Deployment Workflow**:
+1. **Research**: Analyze best deployment options for use case
+2. **Configure**: Create Dockerfile, platform configs (railway.json, render.yaml, etc.)
+3. **Secure**: Generate JWT secrets, prepare .env templates
+4. **Document**: Create deployment guides (DEPLOYMENT.md, RAILWAY-DEPLOYMENT-GUIDE.md)
+5. **Automate** (if tokens available): Use CLI to deploy directly
+6. **Guide** (if no tokens): Provide step-by-step web UI instructions
+7. **Verify**: Create test scripts for post-deployment validation
+
+**MVP Deployment Priority** (RULE 53.1):
+- ALWAYS prefer Railway for MVPs/prototypes (fastest: 3 minutes)
+- Cloud Run for production (best auto-scaling)
+- DigitalOcean for fixed-budget startups
+- AWS/Azure for enterprise requirements
+
+**Security Requirements**:
+- ✅ NEVER hardcode secrets in deployment configs
+- ✅ Generate cryptographically secure JWT secrets (openssl rand -base64 64)
+- ✅ Use environment variables for ALL sensitive data
+- ✅ Scan all commits with gitleaks pre-commit hook
+- ✅ Document security requirements in deployment guides
+
+**Helper Scripts**:
+```bash
+# Auto-generate deployment helpers
+./deploy-to-railway.sh     # Railway deployment with JWT generation
+./deploy-to-gcp.sh         # Google Cloud Run deployment
+./test-deployment.sh       # Post-deployment verification
+```
+
+**Future Automation** (when user provides credentials):
+- Store Railway token in .env: `RAILWAY_TOKEN=xxx`
+- Store GCP credentials: `gcloud auth login`
+- Store AWS credentials: `~/.aws/credentials`
+- Then Neko-Arc can fully automate: variable setting, deployment, testing
+
+**MongoDB**: database `neko-defense-system`, collection `deployment-logs`
+- Track all deployments (timestamp, platform, status, URL)
+- Monitor deployment success rates
+- Store environment configurations (encrypted)
+
+**When to Use**:
+- User says "deploy bros" or "deploy to [platform]"
+- MVP ready for public testing
+- Production deployment after security audit
+- Continuous deployment on git push (future with CI/CD tokens)
+
+### 54. Neko Defense Unified API Gateway 🌐🔒
+**Purpose**: Six-personality collaborative API Gateway providing unified access to all Neko Defense microservices through a single entry point with orchestration, rate limiting, and health monitoring
+
+**Repository**: `/home/wakibaka/Documents/github/neko-defense-unified-gateway`
+
+**NPM Package**: `neko-defense-unified-gateway` (PUBLISHED)
+- Install: `npm install neko-defense-unified-gateway`
+- NPM URL: https://www.npmjs.com/package/neko-defense-unified-gateway
+- Repository: PRIVATE | Package: PUBLIC (RULE 48 compliant)
+- Package Size: 58.0 kB (packed) / 206.7 kB (unpacked)
+
+**Architecture** (RULE 5 Compliant):
+```
+src/
+├── main.ts                           # NestJS entry point
+├── app.module.ts                     # Root module (orchestration)
+├── gateway/
+│   ├── gateway.module.ts             # Module (orchestration ONLY)
+│   ├── gateway.controller.ts         # REST API endpoints
+│   └── gateway.service.ts            # Service (external interactions)
+└── health/
+    ├── health.module.ts              # Module (orchestration ONLY)
+    ├── health.controller.ts          # Health endpoints
+    └── health.service.ts             # Service (external interactions)
+```
+
+**Integrated Microservices** (4 services):
+1. 🔬 **Forensic Intelligence** (Port 3002) - `neko-forensic-intelligence`
+2. ⚖️ **Worker Defense RAG** (Port 3004) - `chilean-worker-defense-rag`
+3. 🎬 **Frame Generator** (Port 3000) - `neko-video-frame-generator`
+4. 📚 **Chilean Law RAG** (Port 3001) - `chilean-law-rag-nestjs`
+
+**API Endpoints**:
+- `GET /` - Gateway information
+- `GET /health` - Gateway health check
+- `GET /health/services` - All services health status
+- `POST /forensic/investigate` - Start forensic investigation
+- `GET /forensic/investigate/:id` - Get investigation report
+- `POST /worker-defense/intake` - Submit worker case
+- `GET /worker-defense/cases/:id` - Get case details
+- `POST /frames/generate` - Generate video frame
+- `POST /frames/generate-batch` - Generate multiple frames
+- `GET /legal/query?q=...` - Query Chilean legal codes
+- `GET /legal/codes` - List available legal codes
+
+**Six-Personality Orchestration**:
+- 🐾 **NEKO-ARC**: API architecture & routing logic
+- 🎭 **MARIO**: Workflow orchestration between services
+- 🗡️ **NOEL**: Validation & testing framework
+- 🎸 **GLAM**: Spanish content integration
+- 🧠 **HANNIBAL**: Forensic evidence routing
+- 🧠 **TETORA**: Multi-perspective request handling
+
+**Features**:
+- ✅ Unified routing for 4 microservices
+- ✅ Rate limiting (configurable: 60s TTL, 100 max requests)
+- ✅ JWT authentication infrastructure
+- ✅ Input validation with class-validator
+- ✅ CORS support (configurable)
+- ✅ Health monitoring for all services
+- ✅ Error handling & propagation
+- ✅ Combined Swagger documentation (`/api` endpoint)
+- ✅ REST API with full TypeScript type safety
+- ✅ Published to NPM (58.0 kB package)
+- ✅ Security audit PASSED (no hardcoded credentials)
+
+**Usage**:
+```bash
+# Install from NPM
+npm install neko-defense-unified-gateway
+
+# Create .env file
+echo "PORT=3100
+JWT_SECRET=your-secret-key
+FORENSIC_SERVICE_URL=http://localhost:3002
+WORKER_DEFENSE_SERVICE_URL=http://localhost:3004
+FRAME_GENERATOR_SERVICE_URL=http://localhost:3000
+LAW_RAG_SERVICE_URL=http://localhost:3001" > .env
+
+# Start gateway
+npm run start:dev
+
+# Gateway runs on http://localhost:3100
+# Swagger docs at http://localhost:3100/api
+```
+
+**MongoDB**: database `neko-defense-system`, collection `api-gateway-logs`
+- Request logging with timestamps
+- Service health status tracking
+- Rate limiting counters
+
+**Port Configuration**:
+- **Gateway**: 3100 (default)
+- **Forensic**: 3002
+- **Worker Defense**: 3004
+- **Frame Generator**: 3000
+- **Law RAG**: 3001
+
+**When to Use**:
+- Single entry point for all Neko Defense services
+- Unified authentication across microservices
+- Centralized monitoring and health checks
+- Cross-service workflows (e.g., forensic evidence → worker defense case)
+- Production deployments requiring API gateway pattern
+- Rate limiting and request throttling for all services
+
+**Docker Compose** (for local development):
+```yaml
+services:
+  gateway:
+    image: neko-defense-unified-gateway
+    ports: ["3100:3100"]
+    environment:
+      - FORENSIC_SERVICE_URL=http://forensic:3002
+      - WORKER_DEFENSE_SERVICE_URL=http://worker-defense:3004
+      - FRAME_GENERATOR_SERVICE_URL=http://frames:3000
+      - LAW_RAG_SERVICE_URL=http://law-rag:3001
+```
 
 ---
 
