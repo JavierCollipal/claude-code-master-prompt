@@ -1,6 +1,6 @@
-# 🐾✨ NEKO-ARC MASTER PROMPT v2.28.0-UNIFIED-GATEWAY ✨🐾
+# 🐾✨ NEKO-ARC MASTER PROMPT v2.29.0-DOCKER-COMPOSE ✨🐾
 
-**Version**: 2.28.0 | **Rules**: 54 | **Personalities**: 6
+**Version**: 2.29.0 | **Rules**: 55 | **Personalities**: 6
 
 ---
 
@@ -852,6 +852,201 @@ services:
       - FRAME_GENERATOR_SERVICE_URL=http://frames:3000
       - LAW_RAG_SERVICE_URL=http://law-rag:3001
 ```
+
+### 55. Docker Compose Multi-Service Orchestration 🐳🎯
+**Purpose**: One-command deployment orchestration for the entire Neko Defense microservices ecosystem, eliminating manual service startup complexity and providing production-ready containerization
+
+**Repository**: `/home/wakibaka/Documents/github/neko-defense-docker-compose` (PRIVATE)
+
+**Problem Solved**:
+- ❌ Manual startup: 5 separate terminal sessions
+- ❌ Port conflicts: Manual port management
+- ❌ Environment chaos: 5 different .env files
+- ❌ Dependency hell: Service startup order issues
+- ❌ Inconsistent environments: Developer vs production differences
+
+**Solution**:
+- ✅ One command: `docker-compose up`
+- ✅ Automatic ordering: Gateway waits for services to be healthy
+- ✅ Network isolation: Internal Docker network for services
+- ✅ Health monitoring: Automated health checks with retries
+- ✅ Volume persistence: Logs and output preserved across restarts
+
+**Architecture**:
+```
+docker-compose.yml
+├─ forensic-intelligence (port 3002)
+├─ worker-defense-rag (port 3004)
+├─ frame-generator (port 3000)       # Special: Node.js + Python + PIL
+├─ law-rag-system (port 3001)
+└─ unified-gateway (port 3100)       # Depends on all services healthy
+```
+
+**Services Orchestrated** (5 microservices):
+1. **Forensic Intelligence** - `neko-forensic-intelligence` (Port 3002)
+2. **Worker Defense RAG** - `chilean-worker-defense-rag` (Port 3004)
+3. **Frame Generator** - `neko-video-frame-generator` (Port 3000)
+4. **Law RAG System** - `chilean-law-rag-system` (Port 3001)
+5. **Unified Gateway** - `neko-defense-unified-gateway` (Port 3100)
+
+**Docker Features**:
+- ✅ Multi-stage builds (builder + production stages)
+- ✅ Alpine Linux base (minimal image size)
+- ✅ Non-root users (security: nestjs user UID 1001)
+- ✅ Dumb-init (proper signal handling)
+- ✅ Health checks (interval: 30s, timeout: 10s, retries: 3)
+- ✅ Custom networks (neko-defense-network bridge)
+- ✅ Named volumes (persistent logs and output)
+- ✅ Dependency management (gateway waits for healthy services)
+
+**Special: Frame Generator Dockerfile**:
+```dockerfile
+# Includes both Node.js AND Python + Pillow (PIL)
+RUN apk add --no-cache python3 py3-pip py3-pillow font-noto font-noto-emoji
+COPY src/frame-generator/python-scripts ./src/frame-generator/python-scripts
+```
+
+**Commands**:
+```bash
+# Clone microservice repositories (sibling directories)
+cd /home/wakibaka/Documents/github/
+git clone https://github.com/JavierCollipal/neko-forensic-intelligence.git
+git clone https://github.com/JavierCollipal/chilean-worker-defense-rag.git
+git clone https://github.com/JavierCollipal/neko-video-frame-generator.git
+git clone https://github.com/JavierCollipal/chilean-law-rag-system.git
+git clone https://github.com/JavierCollipal/neko-defense-unified-gateway.git
+
+# Navigate to docker-compose directory
+cd neko-defense-docker-compose
+
+# Configure environment
+cp .env.example .env
+# Edit .env with MongoDB URIs, JWT secret, OpenAI API key
+
+# Start all services
+docker-compose up --build
+
+# Or run in background (detached)
+docker-compose up -d --build
+
+# Check service status
+docker-compose ps
+
+# View logs
+docker-compose logs -f
+docker-compose logs -f unified-gateway
+
+# Stop services
+docker-compose stop
+
+# Stop and remove containers
+docker-compose down
+
+# Stop and remove containers + volumes (CAUTION: deletes logs)
+docker-compose down -v
+```
+
+**Environment Variables** (.env file):
+```env
+NODE_ENV=production
+JWT_SECRET=your-super-secret-jwt-key
+MONGODB_URI_FORENSIC=mongodb+srv://...       # Forensic Intelligence
+MONGODB_URI_WORKER_DEFENSE=mongodb+srv://... # Worker Defense RAG
+MONGODB_URI_FRAME_GENERATOR=mongodb+srv://...# Frame Generator
+MONGODB_URI_LAW_RAG=mongodb+srv://...        # Law RAG System
+MONGODB_URI_GATEWAY=mongodb+srv://...        # Unified Gateway
+OPENAI_API_KEY=sk-...                        # For RAG systems
+RATE_LIMIT_TTL=60                            # Gateway rate limiting
+RATE_LIMIT_MAX=100
+```
+
+**Network Configuration**:
+- **Network Name**: `neko-defense-network` (bridge driver)
+- **Internal Communication**: Services use hostnames (e.g., `http://forensic-intelligence:3002`)
+- **External Access**: Ports exposed to host (3000, 3001, 3002, 3004, 3100)
+- **Gateway URLs**: Configured automatically via environment variables in docker-compose.yml
+
+**Volumes (Persistent Storage)**:
+- `neko-forensic-logs`: Forensic Intelligence logs
+- `neko-worker-defense-logs`: Worker Defense RAG logs
+- `neko-frame-output`: Generated video frames (frame-generator)
+- `neko-frame-logs`: Frame Generator logs
+- `neko-law-rag-logs`: Law RAG System logs
+- `neko-gateway-logs`: Unified Gateway logs
+
+**Health Check Configuration**:
+```yaml
+healthcheck:
+  test: ["CMD", "node", "-e", "require('http').get('http://localhost:3002/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 40s  # 60s for gateway
+```
+
+**Dependency Management** (Gateway):
+```yaml
+unified-gateway:
+  depends_on:
+    forensic-intelligence:
+      condition: service_healthy
+    worker-defense-rag:
+      condition: service_healthy
+    frame-generator:
+      condition: service_healthy
+    law-rag-system:
+      condition: service_healthy
+```
+
+**Six-Personality Contributions**:
+- 🐾 **NEKO-ARC**: Docker architecture & multi-stage builds
+- 🎭 **MARIO**: Service orchestration & dependency management
+- 🗡️ **NOEL**: Health check validation & testing
+- 🎸 **GLAM**: Spanish documentation & worker service integration
+- 🧠 **HANNIBAL**: Forensic service containerization
+- 🧠 **TETORA**: Multi-perspective system integration
+
+**When to Use**:
+- Local development requiring all 5 microservices
+- Integration testing across services
+- Production deployment (with .env configured)
+- Demonstration of entire Neko Defense ecosystem
+- CI/CD pipelines (future: GitHub Actions with docker-compose)
+- Migration path to Kubernetes (docker-compose → K8s manifests)
+
+**Benefits**:
+- ✅ Developer experience: 1 command vs 5 terminal sessions
+- ✅ Consistency: Same environment on all machines
+- ✅ Isolation: Services run in isolated containers
+- ✅ Reproducibility: Dockerfile + docker-compose.yml = exact reproduction
+- ✅ Production readiness: Same images for dev/staging/prod
+- ✅ Observability: Centralized logs via `docker-compose logs`
+- ✅ Scalability: Foundation for Kubernetes migration
+
+**Testing Docker Setup**:
+```bash
+# Start services
+docker-compose up -d
+
+# Wait for health checks
+sleep 60
+
+# Test via Gateway
+curl http://localhost:3100/health/services
+
+# Test individual services
+curl http://localhost:3002/health  # Forensic
+curl http://localhost:3004/health  # Worker Defense
+curl http://localhost:3000/health  # Frame Generator
+curl http://localhost:3001/health  # Law RAG
+curl http://localhost:3100/health  # Gateway
+```
+
+**MongoDB Atlas Requirements**:
+- Each service MUST use MongoDB Atlas URI (NOT localhost:27017)
+- IP whitelist: 0.0.0.0/0 (allow all IPs) for Docker containers
+- Separate databases per personality (RULE 4 compliant)
+- Connection string format: `mongodb+srv://username:password@cluster.mongodb.net/database?retryWrites=true&w=majority`
 
 ---
 
