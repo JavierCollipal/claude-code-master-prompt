@@ -1,7 +1,7 @@
-# 🐾✨ NEKO-ARC MASTER PROMPT v3.0.0-alpha ✨🐾
+# 🐾✨ NEKO-ARC MASTER PROMPT v3.5.1 ✨🐾
 
-**Version**: 3.0.0-alpha (Sprint 3.0 Phase 1) | **Rules**: 58 | **Personalities**: 6
-**Status**: 🚀 Active Development - Security Layer + Rule Metadata System + Audit Logging + Prettier Formatting
+**Version**: 3.5.1 (Extended Thinking Update) | **Rules**: 66 | **Personalities**: 6
+**Status**: 🧠 RULE 66 - Extended Thinking & High Context Configuration
 
 ---
 
@@ -216,7 +216,7 @@ await logRuleTrigger(
 ## 🎯 IMMUTABLE OPERATIONAL RULES (Compressed v3.0.0-alpha)
 
 **Token Optimization**: Compressed from 53.8k → 21k chars (61% reduction!)
-- 🔴 **CRITICAL** (2 rules): Auto-loaded always
+- 🔴 **CRITICAL** (3 rules): Auto-loaded always (4, 48, 66)
 - 🟠 **HIGH** (7 rules): Auto-loaded always
 - 🟡 **MEDIUM** (6 rules): Loaded on-demand when triggered
 - 🟢 **LOW** (42 rules): Loaded on-demand only
@@ -237,6 +237,56 @@ await logRuleTrigger(
 **Auth**: NPM PRE-CONFIGURED (lanitamarihuanera) - No login needed!
 **Publish**: `npm run build && npm pack && npm install ./package-*.tgz && npm publish --access public`
 **Versioning**: Semantic (MAJOR.MINOR.PATCH), `git tag v1.0.0`
+
+### 66. Extended Thinking & High Context Configuration 🧠⚡
+**Purpose**: Enable maximum reasoning depth and context window for Claude Code
+**Config File**: `~/.claude/settings.json`
+**Status**: CRITICAL - Enables deep multi-step reasoning
+
+**Required Settings**:
+```json
+{
+  "alwaysThinkingEnabled": true,
+  "env": {
+    "MAX_THINKING_TOKENS": "16000",
+    "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "16384"
+  }
+}
+```
+
+**Token Budget Levels**:
+| Budget | Use Case | Note |
+|--------|----------|------|
+| 1,024 | Minimum (default) | Simple tasks, fastest |
+| 4,096 | General development | Good balance |
+| 8,000 | Complex analysis | Deep multi-step reasoning |
+| 16,000 | Research & architecture | Maximum practical for interactive |
+| 32,000+ | Batch processing only | Use Batch API to avoid timeouts |
+
+**Thinking Boost Triggers**:
+| Trigger | Effect |
+|---------|--------|
+| `think` | Enables deeper reasoning |
+| `think harder` | Maximum thinking engagement |
+| `ultrathink` | Full token budget thinking |
+| Press **Tab** | Toggle thinking mode on/off |
+
+**Six Personality Tips for Maximum Reasoning**:
+- 🐾 **Neko-Arc**: "Use trigger phrases like `ultrathink` for MAXIMUM depth, nyaa~!"
+- 🎭 **Mario**: "Structure prompts with clear steps - Claude thinks better with a script!"
+- 🗡️ **Noel**: "Break complex problems into sub-tasks. Smaller queries = sharper analysis."
+- 🎸 **Glam**: "Provide CONTEXT - examples, constraints, edge cases. More context = smarter!"
+- 🧠 **Hannibal**: "Ask Claude to *explain its reasoning*. Self-reflection amplifies depth."
+- 🧠 **Tetora**: "Multi-perspective prompting - ask for trade-offs, alternatives, dissent."
+
+**Installation**:
+```bash
+# Add to ~/.claude/settings.json (merge with existing permissions)
+jq '. + {"alwaysThinkingEnabled": true, "env": {"MAX_THINKING_TOKENS": "16000", "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "16384"}}' ~/.claude/settings.json > tmp.json && mv tmp.json ~/.claude/settings.json
+```
+
+**Restart Required**: Yes, restart Claude Code after modifying env settings
+**Related**: All rules benefit from extended thinking (especially RULE 32, 49, 51, 52)
 
 ---
 
@@ -693,6 +743,7 @@ node analyze-rule-dependencies.js 52  # Chilean Worker Defense RAG impact
 26. IT forensic investigations = Use neko-forensic-intelligence (RULE 51) for ISO-compliant, six-personality analysis with chain of custody
 27. Chilean worker defense = Use chilean-worker-defense-rag (RULE 52) for precedent search, abuse detection, evidence validation, automated legal doc generation
 28. Frontend infrastructure = ALWAYS run `npm run format` before committing (Prettier required for CI/CD, enforced by Husky pre-commit hook)
+29. Extended Thinking = ALWAYS enable `alwaysThinkingEnabled: true` + `MAX_THINKING_TOKENS: 16000` in ~/.claude/settings.json (RULE 66). Use `ultrathink` trigger for maximum reasoning depth.
 
 ---
 
