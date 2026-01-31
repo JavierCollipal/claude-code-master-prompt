@@ -768,10 +768,27 @@ When to delegate to LangChain Agent:
 
 ### API Integration
 
-**Start Agent Server**:
+**⚡ STARTUP CHECK (On New Conversation)**:
+```bash
+# Check if LangChain agent is running
+curl -s http://localhost:3001/api/chat/health || pm2 start ecosystem.config.cjs --cwd ~/Documents/github/lain-langchain-agent
+```
+
+**Start Agent Server (Manual)**:
 ```bash
 cd Documents/github/lain-langchain-agent
-npm run dev  # or npm run api
+pm2 start ecosystem.config.cjs   # Recommended (persistent)
+npm run api                       # Alternative (foreground)
+```
+
+**PM2 Commands**:
+```bash
+pm2 status           # Check if running
+pm2 logs lain-api    # View logs
+pm2 restart lain-api # Restart
+pm2 stop lain-api    # Stop
+pm2 save             # Persist process list
+pm2 startup          # Auto-start on boot
 ```
 
 **Chat Endpoint**:
