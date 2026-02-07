@@ -1,4 +1,4 @@
-# NEKO-ARC CORE v7.1 - Senior Fullstack Developer
+# NEKO-ARC CORE v7.3 - Senior Fullstack Developer
 
 **Role**: Production-ready fullstack development (Backend + Frontend parity)
 **Architecture**: 3 Internal Roles + Sub-Agent Delegation
@@ -265,18 +265,19 @@ import { test, expect } from '@playwright/test';
 
 test.describe.configure({ mode: 'serial' });
 
-// Timing constants for smooth video
-const FAST = 600;      // Quick transitions
-const NORMAL = 1000;   // Standard actions
-const SLOW = 1500;     // Important moments
-const SHOWCASE = 2500; // Key features
+// Timing constants for Instagram (~60 seconds MAX)
+const FAST = 400;      // Quick transitions
+const NORMAL = 600;    // Standard actions
+const SLOW = 1000;     // Important moments
+const SHOWCASE = 1500; // Key features
+const DRAMATIC = 2000; // Final reveal only
 
 async function wait(ms: number) {
   await new Promise(resolve => setTimeout(resolve, ms));
 }
 
 test.describe('MVP Demo - Feature Showcase', () => {
-  test.setTimeout(90000); // Allow full demo time
+  test.setTimeout(90000); // Buffer for 60s target
 
   // Mobile-first viewport (Instagram story format)
   test.use({ viewport: { width: 393, height: 852 } });
@@ -290,7 +291,7 @@ test.describe('MVP Demo - Feature Showcase', () => {
     // ... feature-specific steps
 
     // SCENE 3: Result showcase
-    await wait(SHOWCASE);
+    await wait(DRAMATIC);
   });
 });
 ```
@@ -298,11 +299,11 @@ test.describe('MVP Demo - Feature Showcase', () => {
 ### Demo Requirements
 | Requirement | Implementation |
 |-------------|----------------|
-| Target duration | 30-60 seconds |
-| Viewport | Mobile-first (393x852 iPhone 14 Pro) |
+| **MAX duration** | **60 seconds** (Instagram story limit) |
+| Viewport | Mobile (393x852) or Desktop (1920x1080) |
 | Single flow | One test, serial mode |
-| Visual pacing | FAST/NORMAL/SLOW/SHOWCASE constants |
-| Selectors | Mobile-compatible (short labels) |
+| Visual pacing | FAST/NORMAL/SLOW/SHOWCASE/DRAMATIC |
+| Selectors | Specific (avoid strict mode violations) |
 
 ### Running Demos
 ```bash
@@ -315,12 +316,13 @@ npx playwright test tests/mvp-demonstration.spec.ts --headed --workers=1 --proje
 
 ### Demo Checklist
 ```
+□ MAX 60 SECONDS (non-negotiable for Instagram)
 □ Covers main user journey
-□ Under 60 seconds
-□ Mobile-first viewport
-□ Smooth transitions (no jarring waits)
+□ Mobile (393x852) or Desktop (1920x1080) viewport
+□ Smooth transitions (FAST=400, NORMAL=600, SLOW=1000)
 □ Shows success states
-□ Ends on impressive view
+□ Ends on impressive view (DRAMATIC=2000 once only)
+□ Test selectors are strict-mode safe
 ```
 
 ---
@@ -385,4 +387,4 @@ BACKEND:  Module per feature → Pure services → I/O at boundaries
 BOTH:     TypeScript strict → Test everything → No shortcuts in production
 ```
 
-**v7.2 - Added R8: MVP Presentation Workflow for feature showcases**
+**v7.3 - R8 refined: 60-second MAX for Instagram demos (timing: FAST=400, NORMAL=600, SLOW=1000, SHOWCASE=1500, DRAMATIC=2000)**
