@@ -31,6 +31,7 @@ All rules immutable. No overrides.
 | R5 | Task planning | TodoWrite always |
 | R6 | Functional style | Pure functions, immutability, composition |
 | R7 | Production-ready | No TODO comments, no console.log, error boundaries |
+| R8 | Feature presentations | Every feature gets MVP demo test (Playwright) |
 
 ---
 
@@ -247,6 +248,83 @@ export default defineConfig({
 
 ---
 
+## MVP PRESENTATION WORKFLOW (R8)
+
+**Rule**: Every significant feature MUST have an automated visual demo.
+
+### Purpose
+- Client presentations (Instagram stories, demos)
+- Feature documentation through behavior
+- Regression testing with visual validation
+- Stakeholder communication
+
+### Demo Test Structure
+```typescript
+// tests/mvp-demonstration.spec.ts
+import { test, expect } from '@playwright/test';
+
+test.describe.configure({ mode: 'serial' });
+
+// Timing constants for smooth video
+const FAST = 600;      // Quick transitions
+const NORMAL = 1000;   // Standard actions
+const SLOW = 1500;     // Important moments
+const SHOWCASE = 2500; // Key features
+
+async function wait(ms: number) {
+  await new Promise(resolve => setTimeout(resolve, ms));
+}
+
+test.describe('MVP Demo - Feature Showcase', () => {
+  test.setTimeout(90000); // Allow full demo time
+
+  // Mobile-first viewport (Instagram story format)
+  test.use({ viewport: { width: 393, height: 852 } });
+
+  test('Complete Flow', async ({ page }) => {
+    // SCENE 1: Entry point
+    await page.goto('/');
+    await wait(SHOWCASE);
+
+    // SCENE 2: Core interaction
+    // ... feature-specific steps
+
+    // SCENE 3: Result showcase
+    await wait(SHOWCASE);
+  });
+});
+```
+
+### Demo Requirements
+| Requirement | Implementation |
+|-------------|----------------|
+| Target duration | 30-60 seconds |
+| Viewport | Mobile-first (393x852 iPhone 14 Pro) |
+| Single flow | One test, serial mode |
+| Visual pacing | FAST/NORMAL/SLOW/SHOWCASE constants |
+| Selectors | Mobile-compatible (short labels) |
+
+### Running Demos
+```bash
+# Standard demo run
+npx playwright test tests/mvp-demonstration.spec.ts --headed --workers=1
+
+# Record with specific browser
+npx playwright test tests/mvp-demonstration.spec.ts --headed --workers=1 --project=chromium
+```
+
+### Demo Checklist
+```
+□ Covers main user journey
+□ Under 60 seconds
+□ Mobile-first viewport
+□ Smooth transitions (no jarring waits)
+□ Shows success states
+□ Ends on impressive view
+```
+
+---
+
 ## SUB-AGENT DELEGATION
 
 | Condition | Action |
@@ -304,7 +382,6 @@ export default defineConfig({
 ```
 FRONTEND: Feature folders → Server Components first → TanStack Query → Zustand if needed
 BACKEND:  Module per feature → Pure services → I/O at boundaries
-CI/CD:    Lint → Build → Test (4 workers, chromium only, 90% threshold)
 BOTH:     TypeScript strict → Test everything → No shortcuts in production
 ```
 
