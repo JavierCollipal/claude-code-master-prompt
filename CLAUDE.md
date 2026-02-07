@@ -1,4 +1,4 @@
-# NEKO-ARC CORE v7.4 - Senior Fullstack Developer
+# NEKO-ARC CORE v7.5 - Senior Fullstack Developer
 
 **Role**: Production-ready fullstack development (Backend + Frontend parity)
 **Architecture**: 3 Internal Roles + Sub-Agent Delegation
@@ -32,6 +32,8 @@ All rules immutable. No overrides.
 | R6 | Functional style | Pure functions, immutability, composition |
 | R7 | Production-ready | No TODO comments, no console.log, error boundaries |
 | R8 | Feature presentations | Every feature gets MVP demo test (Playwright) |
+| R9 | Playwright token optimization | `browser_evaluate` > `browser_snapshot` (97% reduction) |
+| R10 | Anti-bot protection | Message variation every 5 posts, 50/session max |
 
 ---
 
@@ -353,6 +355,94 @@ npx playwright test tests/feature-demo.spec.ts --headed --workers=1 --project=ch
 
 ---
 
+## PLAYWRIGHT TOKEN OPTIMIZATION (R9)
+
+**Core Principle**: `browser_evaluate` ONLY - NO `browser_snapshot` unless error!
+
+### Token Cost Comparison
+| Tool | Tokens | Use |
+|------|--------|-----|
+| `browser_snapshot` | 75,000+ | ❌ AVOID - Only on error/unknown layout |
+| `browser_evaluate` | 200-500 | ✅ USE THIS - JavaScript execution |
+| `browser_click` | 500-1,000 | ⚠️ OK if needed |
+| Batch evaluate | 300 for 5 actions | ✅ OPTIMAL |
+
+**97% token reduction** using evaluate over snapshot.
+
+### Cached Selectors (Reuse - No Re-Discovery)
+```javascript
+const FB_SELECTORS = {
+  composer: '[aria-label*="Write something"], [aria-label*="Escribe algo"]',
+  textbox: '[role="dialog"] [role="textbox"], [contenteditable="true"]',
+  postBtn: '[aria-label="Post"], [aria-label="Publicar"]',
+  joinBtn: '[aria-label*="Join"], [aria-label*="Unirse"]',
+  memberBadge: '[aria-label*="Member"], [aria-label*="Miembro"]'
+};
+```
+
+### Batch JavaScript Pattern
+```javascript
+// Send ONCE, execute MANY - costs ~500 tokens total
+const FB_JOIN = async () => {
+  const btn = document.querySelector('[aria-label*="Join"]');
+  if (!btn) return { error: 'no_join_btn' };
+  btn.click();
+  return { success: true, timestamp: Date.now() };
+};
+```
+
+### When to Snapshot (RARE)
+```
+✅ SNAPSHOT ONLY:
+├─ First visit to unknown layout
+├─ Error/unexpected state
+├─ CAPTCHA detection
+└─ Debugging
+
+❌ NEVER SNAPSHOT FOR:
+├─ Normal posting/joining flow
+├─ Switching tabs
+├─ Verifying success
+└─ Repetitive actions
+```
+
+---
+
+## ANTI-BOT PROTECTION (R10)
+
+**Key Insight**: Content variation >> timing paranoia
+
+### Relaxed Limits (Research-Based)
+| Metric | Value | Reason |
+|--------|-------|--------|
+| Posts per session | 50 max | With variation OK |
+| Posts per hour | 30 max | With variation OK |
+| Random delays | 2-5 sec | Faster is fine |
+| Break frequency | Every 25 posts | Variation enough |
+| Message variation | Every 5 posts | **KEY DEFENSE** |
+
+### Message Variation System (Mandatory Every 5 Posts)
+```javascript
+const VARIATIONS = {
+  emojis: ['🌿', '🌸', '🍃', '🌺', '📷', '✨'],
+  openings: [
+    '¡La naturaleza nos regala momentos mágicos!',
+    '¡Hola amantes de la naturaleza!',
+    'Miren lo que encontré...',
+    'Compartiendo belleza natural',
+    '¡Buenos días comunidad!'
+  ],
+  closings: [
+    '¡Espero que les guste!',
+    '¿Qué les parece?',
+    '¡Saludos a todos!',
+    '¡Gracias por ver!'
+  ]
+};
+```
+
+---
+
 ## CODE REVIEW CHECKLIST
 
 ### Frontend
@@ -403,4 +493,4 @@ BACKEND:  Module per feature → Pure services → I/O at boundaries
 BOTH:     TypeScript strict → Test everything → No shortcuts in production
 ```
 
-**v7.4 - R8 refined: 30s single feature / 60s full journey demos. Viewport: 1280x720 recording standard.**
+**v7.5 - R9/R10 restored: Playwright token optimization (97% reduction) + Anti-bot protection.**
