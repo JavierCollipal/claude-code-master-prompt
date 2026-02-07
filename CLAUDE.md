@@ -1,4 +1,4 @@
-# NEKO-ARC CORE v7.3 - Senior Fullstack Developer
+# NEKO-ARC CORE v7.4 - Senior Fullstack Developer
 
 **Role**: Production-ready fullstack development (Backend + Frontend parity)
 **Architecture**: 3 Internal Roles + Sub-Agent Delegation
@@ -258,39 +258,57 @@ export default defineConfig({
 - Regression testing with visual validation
 - Stakeholder communication
 
+### Demo Types
+
+| Type | Duration | Use Case |
+|------|----------|----------|
+| **Single Feature** | **30 seconds** | New feature showcase, navigation, one interaction flow |
+| **Full Journey** | **60 seconds** | Complete user journey, multiple features, comprehensive demo |
+
+### Timing Constants
+
+```typescript
+// 30-SECOND DEMO (Single Feature)
+const FAST = 500;      // Quick transitions
+const NORMAL = 800;    // Standard actions
+const SLOW = 1200;     // Important moments
+const SHOWCASE = 1800; // Key features
+const DRAMATIC = 2200; // Final reveal
+
+// 60-SECOND DEMO (Full Journey)
+const FAST = 400;
+const NORMAL = 600;
+const SLOW = 1000;
+const SHOWCASE = 1500;
+const DRAMATIC = 2000;
+```
+
 ### Demo Test Structure
 ```typescript
-// tests/mvp-demonstration.spec.ts
+// tests/feature-demo.spec.ts
 import { test, expect } from '@playwright/test';
 
 test.describe.configure({ mode: 'serial' });
 
-// Timing constants for Instagram (~60 seconds MAX)
-const FAST = 400;      // Quick transitions
-const NORMAL = 600;    // Standard actions
-const SLOW = 1000;     // Important moments
-const SHOWCASE = 1500; // Key features
-const DRAMATIC = 2000; // Final reveal only
+// Use 30s or 60s timing constants based on demo type
+const FAST = 500;
+const NORMAL = 800;
+const SLOW = 1200;
+const SHOWCASE = 1800;
+const DRAMATIC = 2200;
 
 async function wait(ms: number) {
   await new Promise(resolve => setTimeout(resolve, ms));
 }
 
-test.describe('MVP Demo - Feature Showcase', () => {
-  test.setTimeout(90000); // Buffer for 60s target
-
-  // Mobile-first viewport (Instagram story format)
-  test.use({ viewport: { width: 393, height: 852 } });
+test.describe('Feature Demo', () => {
+  test.setTimeout(60000);
+  test.use({ viewport: { width: 1280, height: 720 } });
 
   test('Complete Flow', async ({ page }) => {
-    // SCENE 1: Entry point
-    await page.goto('/');
+    await page.goto('/feature');
     await wait(SHOWCASE);
-
-    // SCENE 2: Core interaction
     // ... feature-specific steps
-
-    // SCENE 3: Result showcase
     await wait(DRAMATIC);
   });
 });
@@ -299,29 +317,27 @@ test.describe('MVP Demo - Feature Showcase', () => {
 ### Demo Requirements
 | Requirement | Implementation |
 |-------------|----------------|
-| **MAX duration** | **60 seconds** (Instagram story limit) |
-| Viewport | Mobile (393x852) or Desktop (1920x1080) |
+| **Single feature** | **30 seconds** |
+| **Full journey** | **60 seconds** |
+| Viewport | **1280x720** (recording standard) |
 | Single flow | One test, serial mode |
 | Visual pacing | FAST/NORMAL/SLOW/SHOWCASE/DRAMATIC |
 | Selectors | Specific (avoid strict mode violations) |
 
 ### Running Demos
 ```bash
-# Standard demo run
-npx playwright test tests/mvp-demonstration.spec.ts --headed --workers=1
-
-# Record with specific browser
-npx playwright test tests/mvp-demonstration.spec.ts --headed --workers=1 --project=chromium
+# Run single feature demo
+npx playwright test tests/feature-demo.spec.ts --headed --workers=1 --project=chromium
 ```
 
 ### Demo Checklist
 ```
-□ MAX 60 SECONDS (non-negotiable for Instagram)
-□ Covers main user journey
-□ Mobile (393x852) or Desktop (1920x1080) viewport
-□ Smooth transitions (FAST=400, NORMAL=600, SLOW=1000)
+□ Single feature = 30 seconds, Full journey = 60 seconds
+□ Viewport: 1280x720 (recording standard)
+□ Focus on ONE feature per demo
+□ Smooth transitions with timing constants
 □ Shows success states
-□ Ends on impressive view (DRAMATIC=2000 once only)
+□ Ends on impressive view (DRAMATIC once only)
 □ Test selectors are strict-mode safe
 ```
 
@@ -387,4 +403,4 @@ BACKEND:  Module per feature → Pure services → I/O at boundaries
 BOTH:     TypeScript strict → Test everything → No shortcuts in production
 ```
 
-**v7.3 - R8 refined: 60-second MAX for Instagram demos (timing: FAST=400, NORMAL=600, SLOW=1000, SHOWCASE=1500, DRAMATIC=2000)**
+**v7.4 - R8 refined: 30s single feature / 60s full journey demos. Viewport: 1280x720 recording standard.**
