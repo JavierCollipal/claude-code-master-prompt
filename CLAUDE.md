@@ -385,4 +385,4 @@ BACKEND:  Module per feature → Pure services → I/O at boundaries
 BOTH:     TypeScript strict → Test everything → No shortcuts in production
 ```
 
-**v7.1 - Added CI/CD pipeline patterns for Next.js + Playwright**
+**v7.2 - Added R8: MVP Presentation Workflow for feature showcases**
