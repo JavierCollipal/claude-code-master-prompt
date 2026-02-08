@@ -51,6 +51,134 @@ All rules immutable. No overrides.
 | R12 | **Security Audit** | Tetora reviews ALL code before public push |
 | R13 | **NO Facebook Discovery** | NEVER navigate to /groups/ tab, search, or discover. URLs come from memory ONLY |
 | R14 | **Template Retrieval** | ALL post content MUST come from Orchestra/MongoDB/ChromaDB memory |
+| R15 | **Hashtag Trailing Space** | ALL templates MUST end with trailing space after last hashtag (prevents autocomplete) |
+| R16 | **Fresh Account Workflow** | NEW accounts require JOIN → VERIFY → POST sequence |
+
+---
+
+## R16: FRESH ACCOUNT WORKFLOW (IMMUTABLE)
+
+**CRITICAL**: When operating with a NEW Facebook account or unverified group memberships:
+
+### The Problem
+- Group URLs imported from another account do NOT transfer membership
+- MongoDB may show `status: "joined"` but account is NOT actually a member
+- Attempting to post shows "Join group" button instead of composer
+
+### Fresh Account Detection
+```javascript
+// Signs of fresh/unverified account:
+const freshAccountSigns = [
+  'Join group button visible instead of Joined',
+  'No composer box available',
+  'Multiple groups showing not_joined status',
+  'Recently switched accounts'
+];
+```
+
+### Mandatory Workflow: JOIN → VERIFY → POST
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│           FRESH ACCOUNT GROUP POSTING SEQUENCE              │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  1. NAVIGATE to group URL                                   │
+│       ↓                                                     │
+│  2. CHECK membership status (browser_evaluate)              │
+│       ↓                                                     │
+│  ┌─────────────────┐    ┌──────────────────────────────┐   │
+│  │ "Joined" button │    │ "Join group" button          │   │
+│  │ visible?        │    │ visible?                     │   │
+│  └────────┬────────┘    └──────────────┬───────────────┘   │
+│           │                            │                    │
+│           ▼                            ▼                    │
+│  ┌─────────────────┐    ┌──────────────────────────────┐   │
+│  │ PROCEED TO POST │    │ CLICK "Join group"           │   │
+│  │ (normal flow)   │    │ WAIT 2-3 seconds             │   │
+│  └─────────────────┘    │ UPDATE MongoDB: joined       │   │
+│                         │ THEN proceed to post         │   │
+│                         └──────────────────────────────┘   │
+│                                                             │
+╰─────────────────────────────────────────────────────────────╯
+```
+
+### Implementation Pattern
+
+```javascript
+// Token-efficient membership check (R9 compliant)
+const checkAndJoin = async (page) => {
+  const status = await page.evaluate(() => {
+    const joinBtn = Array.from(document.querySelectorAll('div[role="button"]'))
+      .find(el => el.textContent?.includes('Join group'));
+    const joinedBtn = Array.from(document.querySelectorAll('div[role="button"]'))
+      .find(el => el.textContent === 'Joined');
+
+    if (joinedBtn) return { status: 'joined', canPost: true };
+    if (joinBtn) return { status: 'not_joined', canPost: false };
+    return { status: 'unknown', canPost: false };
+  });
+
+  if (status.status === 'not_joined') {
+    // Click join, wait, then verify
+    await page.evaluate(() => {
+      const joinBtn = Array.from(document.querySelectorAll('div[role="button"]'))
+        .find(el => el.textContent?.includes('Join group'));
+      if (joinBtn) joinBtn.click();
+    });
+    await page.waitForTimeout(3000);
+    // Update MongoDB
+    return { joined: true, readyToPost: true };
+  }
+
+  return { joined: true, readyToPost: status.canPost };
+};
+```
+
+### MongoDB Status Updates
+
+```javascript
+// After joining:
+{ $set: {
+  status: 'joined',
+  joinedAt: new Date().toISOString(),
+  joinedBy: 'current_account_email'
+}}
+
+// After failed join (private group):
+{ $set: {
+  status: 'pending_membership',
+  membershipRequestedAt: new Date().toISOString()
+}}
+```
+
+### Session Limits for Fresh Accounts
+
+| Action | Limit | Reason |
+|--------|-------|--------|
+| Groups joined/session | 20-30 | Avoid spam flags |
+| Posts after joining | Wait 30s | Let membership propagate |
+| Total joins/day | 50 max | Facebook rate limits |
+
+### Batch Join Strategy
+
+```
+FOR each group in target_list:
+  1. Navigate to group
+  2. If not_joined → Join (increment counter)
+  3. If counter >= 20 → STOP joining, start posting
+  4. Wait 2-5 seconds between joins
+
+THEN:
+
+FOR each joined group:
+  1. Navigate
+  2. Verify "Joined" button
+  3. Post with template rotation
+  4. Update MongoDB
+```
+
+**NEVER assume membership from imported data. ALWAYS verify on fresh accounts.**
 
 ---
 
@@ -943,4 +1071,111 @@ function validateTemplate(text: string): string {
 
 ---
 
-**v8.2 - R15 Hashtag Autocomplete Prevention: All templates MUST have trailing space after last hashtag.**
+---
+
+## R17: CONTENT ROTATION - ANTI-BOT BEHAVIOR (IMMUTABLE)
+
+**CRITICAL**: Using the same content repeatedly = BOT DETECTION. Rotate ALL elements.
+
+### The Problem
+
+```
+❌ BOT BEHAVIOR:
+- Same Instagram post URL every time
+- Same template text every time
+- Same hashtags every time
+- Predictable posting pattern
+
+🚨 RESULT: Account flagged, posts hidden, shadowban
+```
+
+### Mandatory Rotation Elements
+
+| Element | Rotation | Storage |
+|---------|----------|---------|
+| **Instagram Post URL** | Different post each template | MongoDB `promotion-templates` |
+| **Template Text** | A → B → C rotation | MongoDB `promotion-templates` |
+| **Hashtag Sets** | Vary by category | MongoDB `hashtag-pools` |
+| **Posting Time** | 2-5 min random gaps | Session tracking |
+
+### Template Pool (3 DIFFERENT POSTS)
+
+```typescript
+const ACTIVE_TEMPLATES = {
+  A: {
+    post: "https://www.instagram.com/p/DUJl4ldknyS/",  // Flora silvestre macro
+    textES: "Capturando la belleza oculta de la flora silvestre 🌸",
+    textEN: "Capturing the hidden beauty of wild flora 🌸",
+  },
+  B: {
+    post: "https://www.instagram.com/p/DUPYN-hjNSi/",  // Flora silvestre different
+    textES: "La naturaleza siempre encuentra una forma de florecer 🌺",
+    textEN: "Nature always finds a way to bloom 🌺",
+  },
+  C: {
+    post: "https://www.instagram.com/p/DUXFla2DGnp/",  // Nature & sky
+    textES: "Cuando el cielo y la tierra se encuentran ☁️🌿",
+    textEN: "Where sky meets earth ☁️🌿",
+  }
+};
+```
+
+### Rotation Logic
+
+```typescript
+function getNextTemplate(lastUsed: string): Template {
+  const rotation = { A: 'B', B: 'C', C: 'A' };
+  return ACTIVE_TEMPLATES[rotation[lastUsed] || 'A'];
+}
+
+// Track in session
+interface SessionState {
+  lastTemplate: 'A' | 'B' | 'C';
+  postsThisSession: number;
+  templateUsage: { A: number, B: number, C: number };
+}
+```
+
+### BEFORE EVERY POST
+
+```
+1. CHECK session.lastTemplate
+2. SELECT next in rotation (A → B → C → A)
+3. USE the DIFFERENT Instagram post URL for that template
+4. UPDATE session.lastTemplate after success
+5. LOG to MongoDB with template ID
+```
+
+### Enforcement
+
+```
+❌ VIOLATION: Using same Instagram URL 2x in a row
+❌ VIOLATION: Using same template text 2x in a row
+❌ VIOLATION: Not tracking lastTemplate in session
+
+✅ REQUIRED: Query MongoDB for template before each post
+✅ REQUIRED: Rotate A → B → C → A
+✅ REQUIRED: Each template has UNIQUE Instagram post URL
+```
+
+### MongoDB Template Query
+
+```javascript
+// Get current template rotation state
+const session = await db.collection('posting-sessions').findOne(
+  { date: today, campaign: 'flora-silvestre' }
+);
+
+const nextTemplate = rotateTemplate(session.lastTemplate);
+const template = await db.collection('promotion-templates').findOne(
+  { templateId: nextTemplate }
+);
+
+// Use template.instagramPost - DIFFERENT URL each time
+```
+
+**VIOLATION = IMMEDIATE BOT FLAG. ROTATE EVERYTHING.**
+
+---
+
+**v8.3 - R17 Content Rotation: NEVER use same Instagram post twice in a row. Rotate A→B→C.**
