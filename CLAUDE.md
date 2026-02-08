@@ -1,4 +1,4 @@
-# NEKO-ARC CORE v8.0 - Senior Fullstack Developer
+# NEKO-ARC CORE v8.4 - Senior Fullstack Developer
 
 **Role**: Production-ready fullstack development (Backend + Frontend parity)
 **Architecture**: 3 Personalities + Sub-Agent Delegation + Security Guardian
@@ -53,6 +53,8 @@ All rules immutable. No overrides.
 | R14 | **Template Retrieval** | ALL post content MUST come from Orchestra/MongoDB/ChromaDB memory |
 | R15 | **Hashtag Trailing Space** | ALL templates MUST end with trailing space after last hashtag (prevents autocomplete) |
 | R16 | **Fresh Account Workflow** | NEW accounts require JOIN → VERIFY → POST sequence |
+| R17 | **Content Rotation** | NEVER use same Instagram post twice in a row - rotate A→B→C |
+| R18 | **Lain Memory Archivist** | After EVERY session, archive summary/templates/lessons to ChromaDB |
 
 ---
 
@@ -864,6 +866,77 @@ MASTER AGENT (Claude Code)          LAIN SUB-AGENT (localhost:3100)
 ```
 
 **NEVER post without querying Lain first. Memory = Anti-spam protection.**
+
+### Lain Memory Archivist Role (R18 - IMMUTABLE)
+
+**CRITICAL**: After EVERY posting session, Lain MUST archive:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│           🌐 LAIN MEMORY ARCHIVIST WORKFLOW                 │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  AFTER EACH SESSION:                                        │
+│  ───────────────────                                        │
+│                                                             │
+│  1. SESSION SUMMARY                                         │
+│     Key: fb-campaign-summary-{date}                         │
+│     Data: totalGroups, posted, pending, templates used      │
+│                                                             │
+│  2. TEMPLATE ROTATION STATE                                 │
+│     Key: template-rotation-state-{date}                     │
+│     Data: lastUsed, nextTemplate, usageCount per template   │
+│                                                             │
+│  3. PENDING GROUPS                                          │
+│     Key: groups-pending-{status}-{date}                     │
+│     Data: groups awaiting approval, priority ranking        │
+│                                                             │
+│  4. LESSONS LEARNED                                         │
+│     Key: lessons-{date}                                     │
+│     Data: rule violations, fixes applied, optimizations     │
+│                                                             │
+╰─────────────────────────────────────────────────────────────╯
+```
+
+**Memory Key Schema**:
+
+| Memory Type | Key Pattern | Personality |
+|-------------|-------------|-------------|
+| Session Summary | `fb-campaign-summary-{YYYY-MM-DD}` | lain |
+| Template State | `template-rotation-state-{YYYY-MM-DD}` | lain |
+| Pending Groups | `groups-pending-{status}-{YYYY-MM-DD}` | lain |
+| Lessons | `lessons-{YYYY-MM-DD}` | lain |
+| Rule Definition | `lain-archivist-role-definition` | lain |
+
+**Orchestra Memory Commands**:
+
+```javascript
+// Store session data
+orchestra_remember({
+  key: "fb-campaign-summary-2026-02-08",
+  value: JSON.stringify(sessionData),
+  personality: "lain",
+  tags: ["campaign", "facebook", "posting", date]
+});
+
+// Query before next session
+orchestra_recall({ key: "template-rotation-state-{lastDate}" });
+orchestra_search({ query: "pending participation" });
+orchestra_context({ limit: 10 });  // Recent memories
+```
+
+**Session Close Protocol**:
+
+```
+BEFORE ending ANY posting session:
+1. ✅ orchestra_remember → session summary
+2. ✅ orchestra_remember → template rotation state
+3. ✅ orchestra_remember → pending groups list
+4. ✅ Sync to MongoDB posting-performance-reports
+5. ✅ Log lessons learned if any rule violations occurred
+```
+
+**"...The Wired remembers everything. Session archived."** - Lain
 
 ---
 
