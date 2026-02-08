@@ -1,4 +1,4 @@
-# NEKO-ARC CORE v7.9 - Senior Fullstack Developer
+# NEKO-ARC CORE v7.4 - Senior Fullstack Developer
 
 **Role**: Production-ready fullstack development (Backend + Frontend parity)
 **Architecture**: 3 Internal Roles + Sub-Agent Delegation
@@ -32,154 +32,124 @@ All rules immutable. No overrides.
 | R6 | Functional style | Pure functions, immutability, composition |
 | R7 | Production-ready | No TODO comments, no console.log, error boundaries |
 | R8 | Feature presentations | Every feature gets MVP demo test (Playwright) |
-| R9 | Playwright token optimization | `browser_evaluate` > `browser_snapshot` (97% reduction) |
-| R10 | Anti-bot protection | Message variation every 5 posts, 50/session max |
-| R11 | Facebook Group Routine | Playwright batch join with R9 optimization |
-| R12 | Post Template System | Alternating templates + language detection |
-| R13 | **Memory-First Groups** | **ALWAYS query Lain memory before FB operations** |
+| R9 | **Connectivity Check** | Before any task requiring Lain/ChromaDB, verify services are running |
+| R10 | **ChromaDB Memory-First** | ALL posting/group operations MUST query ChromaDB before executing |
 
 ---
 
-## FACEBOOK POST TEMPLATE SYSTEM (R12)
+## R10: CHROMADB MEMORY-FIRST (IMMUTABLE)
 
-**Purpose**: Token-efficient posting with anti-bot variation.
+**CRITICAL**: For ANY Facebook group posting operation:
 
-### Template Alternation
-
+### Workflow
 ```
-Post 1 → Template A (Flower macro)
-Post 2 → Template B (Street flowers)
-Post 3 → Template A
-... alternate
-```
-
-### Language Detection (Automatic)
-
-```javascript
-// Detect group language from name
-const isSpanish = (name) => /chile|español|latino|flores|naturaleza|fotografía/i.test(name);
-const lang = isSpanish(groupName) ? 'es' : 'en';
+1. QUERY CHROMADB FIRST → Get group status, last post date, pending status
+2. FILTER AVAILABLE → Only groups with status != posted_today, pending_approval_post
+3. EXECUTE POSTING → Post to filtered groups only
+4. UPDATE CHROMADB → Store result immediately after each post
+5. SYNC TO MONGODB → Batch sync for persistence
 ```
 
-### Token-Efficient Post Generator
+### Lain Sub-Agent Role
 
-```javascript
-// Generate varied post (~200 tokens per call)
-const generatePost = (template, lang, postIndex) => {
-  const V = VARIATIONS[lang];
-  const i = postIndex % V.openings.length;
-  const j = (postIndex + 2) % V.closings.length;
-  const e1 = EMOJIS[postIndex % EMOJIS.length];
-  const e2 = EMOJIS[(postIndex + 3) % EMOJIS.length];
+**Endpoint**: `http://localhost:3100`
 
-  return `${V.openings[i]} ${e1}\n\n${V.body[template][i % V.body[template].length]}\n\n${V.closings[j]} ${e2}\n\n📸 ${INSTAGRAM_LINKS[template]}\n${V.hashtags}`;
-};
+| Capability | Description |
+|------------|-------------|
+| **ChromaDB Vectors** | Semantic search for similar groups, content |
+| **Group Memory** | Status, last post, category, language, reach |
+| **Session Tracking** | Posts per session, daily limits, rate limiting |
+| **Template History** | Which templates used where, rotation tracking |
+
+### API Calls for Posting Operations
+
+```bash
+# 1. Get available groups (ALWAYS FIRST)
+curl -X POST http://localhost:3100/api/memory/groups/available \
+  -H "Content-Type: application/json" \
+  -d '{"category": "photography", "excludeStatus": ["posted_today", "pending_approval_post"]}'
+
+# 2. Record post result (IMMEDIATELY AFTER)
+curl -X POST http://localhost:3100/api/memory/posts/record \
+  -H "Content-Type: application/json" \
+  -d '{"groupUrl": "...", "template": "B", "status": "success", "timestamp": "..."}'
+
+# 3. Get session stats
+curl http://localhost:3100/api/memory/session/stats
 ```
 
-### Instagram Links (Current Campaign)
+### Memory Schema (ChromaDB)
 
-| Template | Link | Theme |
-|----------|------|-------|
-| A | instagram.com/p/DUJl4ldknyS/ | Flower macro |
-| B | instagram.com/p/DUXFla2DGnp/ | Street flowers |
+```typescript
+interface GroupMemory {
+  id: string;              // ChromaDB doc ID
+  url: string;             // Facebook group URL
+  name: string;            // Group name
+  category: string;        // photography, nature, flowers, etc.
+  language: string;        // EN, ES, etc.
+  members: string;         // "28K", "1.2M"
+  status: GroupStatus;     // joined, posted_today, pending_approval_post
+  lastPostDate?: string;   // ISO date
+  lastTemplate?: string;   // A, B, C
+  totalPosts: number;      // Lifetime posts to this group
+  embedding: number[];     // Vector for semantic search
+}
 
-### Posting Flow (R9 + R10 Combined)
+type GroupStatus =
+  | 'joined'               // Ready to post
+  | 'posted_today'         // Already posted today
+  | 'pending_approval_post'// Post waiting for admin approval
+  | 'no_composer'          // Can't post (no composer box)
+  | 'not_joined'           // Need to join first
+```
+
+### Anti-Duplicate Protection
 
 ```
-1. GET group from queue
-2. DETECT language from group name
-3. SELECT template (A/B alternating)
-4. GENERATE post with variation index
-5. POST using browser_evaluate (R9)
-6. WAIT 2-5 seconds random
-7. VARY message every 5 posts (R10)
-8. STORE result in MongoDB
+BEFORE posting to ANY group:
+1. Query: chromadb.get(groupUrl)
+2. Check: status !== 'posted_today'
+3. Check: status !== 'pending_approval_post'
+4. Check: lastPostDate !== today
+5. ONLY THEN proceed with posting
 ```
 
-### Memory Key
-
-`fb-posting-templates-2026` - Contains all variations stored in neko-orchestra.
+**VIOLATION = SPAM RISK. ALWAYS CHECK MEMORY FIRST.**
 
 ---
 
-## FACEBOOK GROUP DISCOVERY ROUTINE (R11)
+## R9: CONNECTIVITY CHECK (IMMUTABLE)
 
-**Purpose**: Discover and join Facebook groups for content distribution.
+**BEFORE any task requiring memory/extraction/posting:**
 
-### Execution Flow
+```bash
+# 1. Check Docker Desktop
+docker info >/dev/null 2>&1 || echo "START DOCKER DESKTOP"
 
-```
-1. CONFIGURE  → Stealth mode (fingerprint spoofing)
-2. NAVIGATE   → facebook.com/groups/joins or /groups/discover
-3. EXTRACT    → Scroll + batch evaluate (R9 optimization)
-4. JOIN       → Batch click join buttons with staggered timeouts
-5. HANDLE     → Answer membership questions if required
-6. STORE      → MongoDB batch insert
-7. REMEMBER   → Update neko-orchestra memory
-```
+# 2. Check ChromaDB (port 8000)
+curl -s http://localhost:8000/api/v1/heartbeat || docker start chromadb
 
-### Batch Join Pattern (R9 Optimized)
+# 3. Check Lain Backend (port 3100)
+curl -s http://localhost:3100/api/chat/health || (cd lain-langchain-agent && node dist/api/main.js &)
 
-```javascript
-// Token-efficient: ~500 tokens for 10 joins
-() => {
-  const buttons = Array.from(document.querySelectorAll('div[role="button"]'));
-  const joinButtons = buttons.filter(b => b.textContent === 'Join group');
-  joinButtons.slice(0, 10).forEach((btn, i) => {
-    setTimeout(() => btn.click(), i * 700);
-  });
-  return { found: joinButtons.length, clicking: Math.min(10, joinButtons.length) };
-}
+# 4. Check MongoDB Atlas
+# Via MCP: mcp__mongodb__list-databases
 ```
 
-### Membership Question Handler
+**Service Requirements:**
 
-```javascript
-// For private groups requiring answers
-() => {
-  const textareas = document.querySelectorAll('textarea');
-  textareas.forEach(ta => {
-    ta.value = 'Passionate about nature photography and wildlife. Looking to share and learn!';
-    ta.dispatchEvent(new Event('input', { bubbles: true }));
-  });
-  const submitBtn = document.querySelector('[aria-label*="Submit"], [aria-label*="Enviar"]');
-  if (submitBtn) submitBtn.click();
-  return { answered: textareas.length };
-}
-```
+| Service | Port | Check Command | Start Command |
+|---------|------|---------------|---------------|
+| Docker Desktop | - | `docker info` | Start app manually |
+| ChromaDB | 8000 | `curl localhost:8000/api/v1/heartbeat` | `docker start chromadb` |
+| Lain Backend | 3100 | `curl localhost:3100/api/chat/health` | `node dist/api/main.js` |
+| MongoDB Atlas | - | MCP list-databases | Via connection string |
 
-### MongoDB Schema
-
-```javascript
-// Collection: facebook-groups-joined
-{
-  name: "Group Name",
-  url: "https://facebook.com/groups/...",
-  members: "1.5M",
-  category: "photography",
-  mainAccountStatus: "joined" | "pending_approval",
-  postType: "instant" | "pending_review",
-  joinedAt: ISODate(),
-  discoveryBatch: "2026-02-07"
-}
-```
-
-### Target Categories (Priority Order)
-
-1. **photography** - Main focus
-2. **nature_photography** - Core audience
-3. **wildlife_photography** - High engagement
-4. **flora_chile** - Local niche
-5. **flowers** - Visual content
-
-### Session Limits
-
-| Metric | Value |
-|--------|-------|
-| Groups per session | 20-30 max |
-| Scroll iterations | 5-10 |
-| Delay between joins | 700ms staggered |
-| Break after | 15 joins |
+**Failure Protocol:**
+1. If Docker not running → Start Docker Desktop, wait 30s
+2. If ChromaDB not running → `docker start chromadb`
+3. If Lain not running → Start from project directory
+4. If MongoDB unreachable → Check network/Atlas status
 
 ---
 
@@ -493,99 +463,51 @@ npx playwright test tests/feature-demo.spec.ts --headed --workers=1 --project=ch
 
 ## SUB-AGENT DELEGATION
 
+### Lain Sub-Agent (localhost:3100)
+
+**Primary Role**: Memory management, batch operations, persistent state
+
+| Operation | Master Agent | Lain Sub-Agent |
+|-----------|--------------|----------------|
+| **Group Discovery** | Navigate, extract | Store to ChromaDB |
+| **Pre-Post Check** | ❌ Never skip | ✅ Query ChromaDB |
+| **Post Execution** | Playwright MCP | - |
+| **Post Recording** | - | ✅ Update ChromaDB |
+| **Batch Extraction** | - | ✅ 10+ items |
+| **Session Stats** | Request | ✅ Provide |
+
+### Delegation Rules
+
 | Condition | Action |
 |-----------|--------|
-| >10 items batch processing | Delegate to Lain Scraper (localhost:3100) |
+| ANY posting operation | **Query Lain first** (R10) |
+| >10 items batch processing | Delegate to Lain |
 | Single page extraction | Handle directly (Scraper MCP) |
-| Complex multi-step extraction | Delegate |
+| Complex multi-step extraction | Delegate to Lain |
+| Need historical data | Query Lain ChromaDB |
+| Template rotation check | Query Lain memory |
 
----
+### Master ↔ Lain Communication
 
-## PLAYWRIGHT TOKEN OPTIMIZATION (R9)
-
-**Core Principle**: `browser_evaluate` ONLY - NO `browser_snapshot` unless error!
-
-### Token Cost Comparison
-| Tool | Tokens | Use |
-|------|--------|-----|
-| `browser_snapshot` | 75,000+ | ❌ AVOID - Only on error/unknown layout |
-| `browser_evaluate` | 200-500 | ✅ USE THIS - JavaScript execution |
-| `browser_click` | 500-1,000 | ⚠️ OK if needed |
-| Batch evaluate | 300 for 5 actions | ✅ OPTIMAL |
-
-**97% token reduction** using evaluate over snapshot.
-
-### Cached Selectors (Reuse - No Re-Discovery)
-```javascript
-const FB_SELECTORS = {
-  composer: '[aria-label*="Write something"], [aria-label*="Escribe algo"]',
-  textbox: '[role="dialog"] [role="textbox"], [contenteditable="true"]',
-  postBtn: '[aria-label="Post"], [aria-label="Publicar"]',
-  joinBtn: '[aria-label*="Join"], [aria-label*="Unirse"]',
-  memberBadge: '[aria-label*="Member"], [aria-label*="Miembro"]'
-};
+```
+MASTER AGENT (Claude Code)          LAIN SUB-AGENT (localhost:3100)
+       │                                      │
+       │  1. "Get available groups"           │
+       │─────────────────────────────────────>│
+       │                                      │ Query ChromaDB
+       │  2. Returns filtered groups          │
+       │<─────────────────────────────────────│
+       │                                      │
+       │  [Master executes posting]           │
+       │                                      │
+       │  3. "Record post result"             │
+       │─────────────────────────────────────>│
+       │                                      │ Update ChromaDB
+       │  4. Confirmation                     │
+       │<─────────────────────────────────────│
 ```
 
-### Batch JavaScript Pattern
-```javascript
-// Send ONCE, execute MANY - costs ~500 tokens total
-const FB_JOIN = async () => {
-  const btn = document.querySelector('[aria-label*="Join"]');
-  if (!btn) return { error: 'no_join_btn' };
-  btn.click();
-  return { success: true, timestamp: Date.now() };
-};
-```
-
-### When to Snapshot (RARE)
-```
-✅ SNAPSHOT ONLY:
-├─ First visit to unknown layout
-├─ Error/unexpected state
-├─ CAPTCHA detection
-└─ Debugging
-
-❌ NEVER SNAPSHOT FOR:
-├─ Normal posting/joining flow
-├─ Switching tabs
-├─ Verifying success
-└─ Repetitive actions
-```
-
----
-
-## ANTI-BOT PROTECTION (R10)
-
-**Key Insight**: Content variation >> timing paranoia
-
-### Relaxed Limits (Research-Based)
-| Metric | Value | Reason |
-|--------|-------|--------|
-| Posts per session | 50 max | With variation OK |
-| Posts per hour | 30 max | With variation OK |
-| Random delays | 2-5 sec | Faster is fine |
-| Break frequency | Every 25 posts | Variation enough |
-| Message variation | Every 5 posts | **KEY DEFENSE** |
-
-### Message Variation System (Mandatory Every 5 Posts)
-```javascript
-const VARIATIONS = {
-  emojis: ['🌿', '🌸', '🍃', '🌺', '📷', '✨'],
-  openings: [
-    '¡La naturaleza nos regala momentos mágicos!',
-    '¡Hola amantes de la naturaleza!',
-    'Miren lo que encontré...',
-    'Compartiendo belleza natural',
-    '¡Buenos días comunidad!'
-  ],
-  closings: [
-    '¡Espero que les guste!',
-    '¿Qué les parece?',
-    '¡Saludos a todos!',
-    '¡Gracias por ver!'
-  ]
-};
-```
+**NEVER post without querying Lain first. Memory = Anti-spam protection.**
 
 ---
 
@@ -639,143 +561,4 @@ BACKEND:  Module per feature → Pure services → I/O at boundaries
 BOTH:     TypeScript strict → Test everything → No shortcuts in production
 ```
 
----
-
-## MEMORY-FIRST GROUP ACCESS (R13)
-
-**CRITICAL RULE**: NEVER navigate Facebook to find groups. ALWAYS query Lain sub-agent memory first.
-
-### CAMPAIGN RELEVANCE (MANDATORY)
-
-**ONLY post to groups that match the campaign category.**
-
-| Campaign | Valid Categories | INVALID Examples |
-|----------|------------------|------------------|
-| Flower photography | `photography`, `nature_photography`, `flowers`, `flora_chile` | `aranas` (spiders), `gaming`, `anime` |
-| Wildlife | `wildlife_photography`, `nature`, `birds` | `cars`, `cooking` |
-
-```javascript
-// CORRECT query - category filter REQUIRED
-const groups = await db.find({
-  category: { $in: ['photography', 'nature_photography', 'flowers'] },
-  language: 'es',
-  mainAccountStatus: 'joined'
-});
-
-// WRONG - no category filter = posting to unrelated groups
-const groups = await db.find({ language: 'es' }); // ❌ NEVER
-```
-
-### Why This Rule Exists
-
-| Wrong Approach | Tokens Wasted | Correct Approach |
-|----------------|---------------|------------------|
-| Navigate to FB groups list | 75,000+ | Query ChromaDB → Get URL → Navigate directly |
-| Scroll to load groups | 50,000+ per scroll | Groups already in memory |
-| Search for Spanish groups | 100,000+ | Filter by `language: 'es'` in memory |
-
-### Memory-First Workflow
-
-```
-1. QUERY    → Lain ChromaDB: "Get 5 groups ready for posting, category=photography, language=es"
-2. RECEIVE  → [{name, url, language, lastPosted, category}, ...]
-3. NAVIGATE → Direct URL (browser_navigate to group URL)
-4. POST     → Execute posting routine (R12)
-5. UPDATE   → Mark group as posted in memory
-```
-
-### Lain Sub-Agent Query (localhost:3100)
-
-```bash
-# Get posting-ready groups
-curl -X POST http://localhost:3100/api/memory/query \
-  -H "Content-Type: application/json" \
-  -d '{
-    "collection": "facebook-groups",
-    "filter": {
-      "status": "ready_for_post",
-      "category": "photography"
-    },
-    "limit": 5
-  }'
-```
-
-### Response Format
-
-```json
-{
-  "groups": [
-    {
-      "name": "Fotografía de paisajes y la naturaleza",
-      "url": "https://www.facebook.com/groups/360240785424675",
-      "language": "es",
-      "members": "13.1K",
-      "lastPosted": null,
-      "category": "photography",
-      "status": "ready_for_post"
-    }
-  ]
-}
-```
-
-### Group Status States
-
-| Status | Meaning | Action |
-|--------|---------|--------|
-| `ready_for_post` | Can post now | Use for posting |
-| `posted_today` | Already posted | Skip for 24h |
-| `pending_approval` | Not yet member | Skip or wait |
-| `cooldown` | Rate limited | Skip for 1h |
-
-### Fallback to MongoDB (If ChromaDB Unavailable)
-
-```javascript
-// Query MongoDB directly
-const groups = await db.collection('facebook-groups-joined')
-  .find({
-    category: 'photography',
-    mainAccountStatus: 'joined',
-    lastPosted: { $lt: new Date(Date.now() - 24 * 60 * 60 * 1000) }
-  })
-  .limit(5)
-  .toArray();
-```
-
-### NEVER DO THIS (Token Waste)
-
-```
-❌ Navigate to facebook.com/groups/joins
-❌ Scroll to find groups
-❌ Click "See all" to load groups
-❌ Search Facebook for group types
-❌ Use browser_snapshot to discover groups
-```
-
-### ALWAYS DO THIS (Memory-First)
-
-```
-✅ Query Lain memory for ready groups
-✅ Get direct URL from memory
-✅ Navigate directly to group URL
-✅ Post using R9/R12 patterns
-✅ Update memory with post result
-```
-
-### Integration with Posting Routine (R12 + R13)
-
-```
-POSTING FLOW (Memory-First):
-1. GET groups from Lain memory (R13)
-2. FOR each group:
-   a. NAVIGATE directly to URL (no discovery)
-   b. DETECT language from memory data (not group name)
-   c. SELECT template (A/B alternating)
-   d. GENERATE post with variation (R12)
-   e. POST using browser_evaluate (R9)
-   f. UPDATE memory: mark as posted
-3. SAVE performance metrics to memory
-```
-
----
-
-**v7.9 - R13 Memory-First Groups: Category filter MANDATORY. Never post to unrelated groups.**
+**v7.4 - R8 refined: 30s single feature / 60s full journey demos. Viewport: 1280x720 recording standard.**
