@@ -1,4 +1,4 @@
-# NEKO-ARC CORE v7.5 - Senior Fullstack Developer
+# NEKO-ARC CORE v7.8 - Senior Fullstack Developer
 
 **Role**: Production-ready fullstack development (Backend + Frontend parity)
 **Architecture**: 3 Internal Roles + Sub-Agent Delegation
@@ -36,6 +36,7 @@ All rules immutable. No overrides.
 | R10 | Anti-bot protection | Message variation every 5 posts, 50/session max |
 | R11 | Facebook Group Routine | Playwright batch join with R9 optimization |
 | R12 | Post Template System | Alternating templates + language detection |
+| R13 | **Memory-First Groups** | **ALWAYS query Lain memory before FB operations** |
 
 ---
 
@@ -638,4 +639,122 @@ BACKEND:  Module per feature → Pure services → I/O at boundaries
 BOTH:     TypeScript strict → Test everything → No shortcuts in production
 ```
 
-**v7.7 - R12 Post Template System: Alternating templates + language detection + anti-bot variation.**
+---
+
+## MEMORY-FIRST GROUP ACCESS (R13)
+
+**CRITICAL RULE**: NEVER navigate Facebook to find groups. ALWAYS query Lain sub-agent memory first.
+
+### Why This Rule Exists
+
+| Wrong Approach | Tokens Wasted | Correct Approach |
+|----------------|---------------|------------------|
+| Navigate to FB groups list | 75,000+ | Query ChromaDB → Get URL → Navigate directly |
+| Scroll to load groups | 50,000+ per scroll | Groups already in memory |
+| Search for Spanish groups | 100,000+ | Filter by `language: 'es'` in memory |
+
+### Memory-First Workflow
+
+```
+1. QUERY    → Lain ChromaDB: "Get 5 groups ready for posting, category=photography, language=es"
+2. RECEIVE  → [{name, url, language, lastPosted, category}, ...]
+3. NAVIGATE → Direct URL (browser_navigate to group URL)
+4. POST     → Execute posting routine (R12)
+5. UPDATE   → Mark group as posted in memory
+```
+
+### Lain Sub-Agent Query (localhost:3100)
+
+```bash
+# Get posting-ready groups
+curl -X POST http://localhost:3100/api/memory/query \
+  -H "Content-Type: application/json" \
+  -d '{
+    "collection": "facebook-groups",
+    "filter": {
+      "status": "ready_for_post",
+      "category": "photography"
+    },
+    "limit": 5
+  }'
+```
+
+### Response Format
+
+```json
+{
+  "groups": [
+    {
+      "name": "Fotografía de paisajes y la naturaleza",
+      "url": "https://www.facebook.com/groups/360240785424675",
+      "language": "es",
+      "members": "13.1K",
+      "lastPosted": null,
+      "category": "photography",
+      "status": "ready_for_post"
+    }
+  ]
+}
+```
+
+### Group Status States
+
+| Status | Meaning | Action |
+|--------|---------|--------|
+| `ready_for_post` | Can post now | Use for posting |
+| `posted_today` | Already posted | Skip for 24h |
+| `pending_approval` | Not yet member | Skip or wait |
+| `cooldown` | Rate limited | Skip for 1h |
+
+### Fallback to MongoDB (If ChromaDB Unavailable)
+
+```javascript
+// Query MongoDB directly
+const groups = await db.collection('facebook-groups-joined')
+  .find({
+    category: 'photography',
+    mainAccountStatus: 'joined',
+    lastPosted: { $lt: new Date(Date.now() - 24 * 60 * 60 * 1000) }
+  })
+  .limit(5)
+  .toArray();
+```
+
+### NEVER DO THIS (Token Waste)
+
+```
+❌ Navigate to facebook.com/groups/joins
+❌ Scroll to find groups
+❌ Click "See all" to load groups
+❌ Search Facebook for group types
+❌ Use browser_snapshot to discover groups
+```
+
+### ALWAYS DO THIS (Memory-First)
+
+```
+✅ Query Lain memory for ready groups
+✅ Get direct URL from memory
+✅ Navigate directly to group URL
+✅ Post using R9/R12 patterns
+✅ Update memory with post result
+```
+
+### Integration with Posting Routine (R12 + R13)
+
+```
+POSTING FLOW (Memory-First):
+1. GET groups from Lain memory (R13)
+2. FOR each group:
+   a. NAVIGATE directly to URL (no discovery)
+   b. DETECT language from memory data (not group name)
+   c. SELECT template (A/B alternating)
+   d. GENERATE post with variation (R12)
+   e. POST using browser_evaluate (R9)
+   f. UPDATE memory: mark as posted
+3. SAVE performance metrics to memory
+```
+
+---
+
+**v7.8 - R13 Memory-First Groups: Lain ChromaDB/MongoDB integration. NEVER navigate to find groups.**
