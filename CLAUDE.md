@@ -49,6 +49,8 @@ All rules immutable. No overrides.
 | R10 | **ChromaDB Memory-First** | ALL posting/group operations MUST query ChromaDB before executing |
 | R11 | **Default .gitignore** | ALL new repos MUST include security-first .gitignore |
 | R12 | **Security Audit** | Tetora reviews ALL code before public push |
+| R13 | **NO Facebook Discovery** | NEVER navigate to /groups/ tab, search, or discover. URLs come from memory ONLY |
+| R14 | **Template Retrieval** | ALL post content MUST come from Orchestra/MongoDB/ChromaDB memory |
 
 ---
 
@@ -287,6 +289,60 @@ When auditing code, Tetora speaks with:
 ║                                                               ║
 ╚═══════════════════════════════════════════════════════════════╝
 ```
+
+---
+
+## R13: NO FACEBOOK DISCOVERY (IMMUTABLE)
+
+**CRITICAL**: NEVER navigate to Facebook to discover or search for groups.
+
+### FORBIDDEN Actions (75,000+ tokens wasted per violation)
+
+```
+❌ NEVER: Navigate to facebook.com/groups/
+❌ NEVER: Click "Groups" tab in Facebook navigation
+❌ NEVER: Use Facebook search to find groups
+❌ NEVER: Click "See all" on joined groups
+❌ NEVER: Browse group suggestions
+❌ NEVER: Use Playwright to scrape group lists
+```
+
+### REQUIRED Workflow
+
+```
+✅ ALWAYS: Query Lain API first → GET /api/promotion/groups
+✅ ALWAYS: Get group URL directly from memory
+✅ ALWAYS: Navigate directly to the exact URL
+✅ ALWAYS: Post → Update memory → Next URL
+```
+
+### Correct vs Wrong
+
+```bash
+# ❌ WRONG (wastes 75K+ tokens)
+browser_navigate("https://www.facebook.com/groups/")
+browser_click("Search groups")
+browser_type("flower photography")
+# ... discovery loop ...
+
+# ✅ CORRECT (uses ~200 tokens)
+curl -s "http://localhost:3100/api/promotion/groups"
+# Get URL from response: "https://www.facebook.com/groups/wildlifechile"
+browser_navigate("https://www.facebook.com/groups/wildlifechile")
+# Post directly
+```
+
+### Why This Rule Exists
+
+| Discovery Mode | Memory Mode |
+|----------------|-------------|
+| 75,000+ tokens | ~500 tokens |
+| 5+ minutes | <30 seconds |
+| Random groups | Targeted groups |
+| No tracking | Full history |
+| Duplicate risk | Anti-duplicate |
+
+**VIOLATION = SESSION WASTE. URLs are ALREADY in memory.**
 
 ---
 
@@ -733,4 +789,158 @@ BACKEND:  Module per feature → Pure services → I/O at boundaries
 BOTH:     TypeScript strict → Test everything → No shortcuts in production
 ```
 
-**v8.0 - Tetora Security Guard: R11 .gitignore + R12 Security Audit. Public repos require Tetora approval. "Ossu!"**
+---
+
+## R14: TEMPLATE RETRIEVAL WORKFLOW (IMMUTABLE)
+
+**CRITICAL**: For ANY Facebook posting operation, templates MUST come from memory.
+
+### Storage Locations
+
+| Storage | Purpose | Query Method |
+|---------|---------|--------------|
+| **Orchestra Memory** | Quick access, session data | `orchestra_recall("instagram-campaign-2026-active")` |
+| **MongoDB** | Persistent templates | `mcp__mongodb__find(db: "lain-wired-archives", collection: "promotion-templates")` |
+| **ChromaDB** | Semantic search, vectors | Via Lain API `localhost:3100` |
+
+### Template Schema
+
+```typescript
+interface PromotionTemplate {
+  templateId: string;           // "A", "B", "C"
+  instagramAccount: string;     // "@monitos.anime.diablo"
+  instagramPost: string;        // Full URL
+  type: string;                 // "flora silvestre", "nature and sky"
+  textEN: string;               // English template
+  textES: string;               // Spanish template
+  createdAt: string;            // ISO date
+  usageCount: number;           // Track usage
+}
+```
+
+### Retrieval Workflow
+
+```
+1. QUERY ORCHESTRA → orchestra_recall("instagram-campaign-2026-active")
+2. IF NOT FOUND → Query MongoDB: promotion-templates collection
+3. SELECT TEMPLATE → Rotate A → B → C based on lastUsed
+4. DETECT LANGUAGE → From group name (Spanish keywords = ES)
+5. USE TEMPLATE → textEN or textES based on language
+6. LOG USAGE → Update MongoDB posting-session-logs
+```
+
+### Language Detection
+
+```typescript
+const SPANISH_INDICATORS = [
+  'chile', 'naturaleza', 'fotografía', 'paisajes',
+  'flores', 'latino', 'español', 'mundo'
+];
+
+function detectLanguage(groupName: string): 'EN' | 'ES' {
+  const lower = groupName.toLowerCase();
+  return SPANISH_INDICATORS.some(w => lower.includes(w)) ? 'ES' : 'EN';
+}
+```
+
+### Current Active Campaign
+
+```
+Instagram: @monitos.anime.diablo
+Templates:
+  A: https://www.instagram.com/p/DUJl4ldknyS/ (flora silvestre)
+  B: https://www.instagram.com/p/DUPYN-hjNSi/ (flora silvestre)
+  C: https://www.instagram.com/p/DUXFla2DGnp/ (nature & sky)
+```
+
+### Session Logging
+
+```bash
+# Log to MongoDB after EVERY post
+mcp__mongodb__update-many(
+  db: "lain-wired-archives",
+  collection: "posting-session-logs",
+  filter: { sessionId: "session-2026-02-08-nature" },
+  update: {
+    $push: { logs: { timestamp, action, groupUrl, template, result } },
+    $inc: { postsCompleted: 1 }
+  }
+)
+```
+
+**VIOLATION = RANDOM CONTENT RISK. TEMPLATES ARE IN MEMORY.**
+
+---
+
+## R15: FACEBOOK HASHTAG AUTOCOMPLETE PREVENTION (IMMUTABLE)
+
+**CRITICAL**: Facebook's hashtag autocomplete dropdown BLOCKS the Post button.
+
+### The Problem
+
+```
+When typing: #NaturePhotography #WildFlowers
+                                            ↑
+                              No trailing space = autocomplete triggers
+                              Autocomplete dropdown blocks Post button
+                              Click fails with "element intercepts pointer events"
+```
+
+### The Solution
+
+**ALWAYS add a trailing space or newline after the LAST hashtag.**
+
+```typescript
+// ❌ WRONG - triggers autocomplete, blocks Post button
+const text = "Check my photo! #Nature #Flowers #WildFlowers";
+
+// ✅ CORRECT - trailing space prevents autocomplete
+const text = "Check my photo! #Nature #Flowers #WildFlowers ";
+//                                                        ↑ trailing space
+```
+
+### Template Format Rule
+
+ALL templates in MongoDB/ChromaDB MUST end with:
+- A trailing space after last hashtag, OR
+- A trailing newline after last hashtag
+
+```typescript
+// MongoDB template schema
+interface PromotionTemplate {
+  textEN: string;  // MUST end with space/newline after last hashtag
+  textES: string;  // MUST end with space/newline after last hashtag
+}
+
+// Example
+{
+  textEN: "Beautiful nature 🌸 @monitos.anime.diablo\n\n#Nature #Flowers #Wild ",
+  //                                                                        ↑ trailing space
+}
+```
+
+### Validation Before Posting
+
+```typescript
+function validateTemplate(text: string): string {
+  // Ensure text ends with space if it ends with hashtag
+  if (text.match(/#\w+$/)) {
+    return text + ' ';  // Add trailing space
+  }
+  return text;
+}
+```
+
+### Recovery If Autocomplete Triggers
+
+```
+1. Press Escape to dismiss dropdown
+2. Add space after last hashtag
+3. Click Post button
+```
+
+**VIOLATION = POST BUTTON BLOCKED. ALWAYS TRAIL HASHTAGS WITH SPACE.**
+
+---
+
+**v8.2 - R15 Hashtag Autocomplete Prevention: All templates MUST have trailing space after last hashtag.**
