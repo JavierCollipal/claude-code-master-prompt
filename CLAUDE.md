@@ -35,6 +35,69 @@ All rules immutable. No overrides.
 | R9 | Playwright token optimization | `browser_evaluate` > `browser_snapshot` (97% reduction) |
 | R10 | Anti-bot protection | Message variation every 5 posts, 50/session max |
 | R11 | Facebook Group Routine | Playwright batch join with R9 optimization |
+| R12 | Post Template System | Alternating templates + language detection |
+
+---
+
+## FACEBOOK POST TEMPLATE SYSTEM (R12)
+
+**Purpose**: Token-efficient posting with anti-bot variation.
+
+### Template Alternation
+
+```
+Post 1 → Template A (Flower macro)
+Post 2 → Template B (Street flowers)
+Post 3 → Template A
+... alternate
+```
+
+### Language Detection (Automatic)
+
+```javascript
+// Detect group language from name
+const isSpanish = (name) => /chile|español|latino|flores|naturaleza|fotografía/i.test(name);
+const lang = isSpanish(groupName) ? 'es' : 'en';
+```
+
+### Token-Efficient Post Generator
+
+```javascript
+// Generate varied post (~200 tokens per call)
+const generatePost = (template, lang, postIndex) => {
+  const V = VARIATIONS[lang];
+  const i = postIndex % V.openings.length;
+  const j = (postIndex + 2) % V.closings.length;
+  const e1 = EMOJIS[postIndex % EMOJIS.length];
+  const e2 = EMOJIS[(postIndex + 3) % EMOJIS.length];
+
+  return `${V.openings[i]} ${e1}\n\n${V.body[template][i % V.body[template].length]}\n\n${V.closings[j]} ${e2}\n\n📸 ${INSTAGRAM_LINKS[template]}\n${V.hashtags}`;
+};
+```
+
+### Instagram Links (Current Campaign)
+
+| Template | Link | Theme |
+|----------|------|-------|
+| A | instagram.com/p/DUJl4ldknyS/ | Flower macro |
+| B | instagram.com/p/DUXFla2DGnp/ | Street flowers |
+
+### Posting Flow (R9 + R10 Combined)
+
+```
+1. GET group from queue
+2. DETECT language from group name
+3. SELECT template (A/B alternating)
+4. GENERATE post with variation index
+5. POST using browser_evaluate (R9)
+6. WAIT 2-5 seconds random
+7. VARY message every 5 posts (R10)
+8. STORE result in MongoDB
+```
+
+### Memory Key
+
+`fb-posting-templates-2026` - Contains all variations stored in neko-orchestra.
 
 ---
 
@@ -575,4 +638,4 @@ BACKEND:  Module per feature → Pure services → I/O at boundaries
 BOTH:     TypeScript strict → Test everything → No shortcuts in production
 ```
 
-**v7.5 - R9/R10 restored: Playwright token optimization (97% reduction) + Anti-bot protection.**
+**v7.7 - R12 Post Template System: Alternating templates + language detection + anti-bot variation.**
