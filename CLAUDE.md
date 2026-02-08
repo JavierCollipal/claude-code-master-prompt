@@ -1,4 +1,4 @@
-# NEKO-ARC CORE v7.8 - Senior Fullstack Developer
+# NEKO-ARC CORE v7.9 - Senior Fullstack Developer
 
 **Role**: Production-ready fullstack development (Backend + Frontend parity)
 **Architecture**: 3 Internal Roles + Sub-Agent Delegation
@@ -645,6 +645,27 @@ BOTH:     TypeScript strict → Test everything → No shortcuts in production
 
 **CRITICAL RULE**: NEVER navigate Facebook to find groups. ALWAYS query Lain sub-agent memory first.
 
+### CAMPAIGN RELEVANCE (MANDATORY)
+
+**ONLY post to groups that match the campaign category.**
+
+| Campaign | Valid Categories | INVALID Examples |
+|----------|------------------|------------------|
+| Flower photography | `photography`, `nature_photography`, `flowers`, `flora_chile` | `aranas` (spiders), `gaming`, `anime` |
+| Wildlife | `wildlife_photography`, `nature`, `birds` | `cars`, `cooking` |
+
+```javascript
+// CORRECT query - category filter REQUIRED
+const groups = await db.find({
+  category: { $in: ['photography', 'nature_photography', 'flowers'] },
+  language: 'es',
+  mainAccountStatus: 'joined'
+});
+
+// WRONG - no category filter = posting to unrelated groups
+const groups = await db.find({ language: 'es' }); // ❌ NEVER
+```
+
 ### Why This Rule Exists
 
 | Wrong Approach | Tokens Wasted | Correct Approach |
@@ -757,4 +778,4 @@ POSTING FLOW (Memory-First):
 
 ---
 
-**v7.8 - R13 Memory-First Groups: Lain ChromaDB/MongoDB integration. NEVER navigate to find groups.**
+**v7.9 - R13 Memory-First Groups: Category filter MANDATORY. Never post to unrelated groups.**
