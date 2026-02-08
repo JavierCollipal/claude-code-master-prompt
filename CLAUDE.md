@@ -34,6 +34,88 @@ All rules immutable. No overrides.
 | R8 | Feature presentations | Every feature gets MVP demo test (Playwright) |
 | R9 | Playwright token optimization | `browser_evaluate` > `browser_snapshot` (97% reduction) |
 | R10 | Anti-bot protection | Message variation every 5 posts, 50/session max |
+| R11 | Facebook Group Routine | Playwright batch join with R9 optimization |
+
+---
+
+## FACEBOOK GROUP DISCOVERY ROUTINE (R11)
+
+**Purpose**: Discover and join Facebook groups for content distribution.
+
+### Execution Flow
+
+```
+1. CONFIGURE  → Stealth mode (fingerprint spoofing)
+2. NAVIGATE   → facebook.com/groups/joins or /groups/discover
+3. EXTRACT    → Scroll + batch evaluate (R9 optimization)
+4. JOIN       → Batch click join buttons with staggered timeouts
+5. HANDLE     → Answer membership questions if required
+6. STORE      → MongoDB batch insert
+7. REMEMBER   → Update neko-orchestra memory
+```
+
+### Batch Join Pattern (R9 Optimized)
+
+```javascript
+// Token-efficient: ~500 tokens for 10 joins
+() => {
+  const buttons = Array.from(document.querySelectorAll('div[role="button"]'));
+  const joinButtons = buttons.filter(b => b.textContent === 'Join group');
+  joinButtons.slice(0, 10).forEach((btn, i) => {
+    setTimeout(() => btn.click(), i * 700);
+  });
+  return { found: joinButtons.length, clicking: Math.min(10, joinButtons.length) };
+}
+```
+
+### Membership Question Handler
+
+```javascript
+// For private groups requiring answers
+() => {
+  const textareas = document.querySelectorAll('textarea');
+  textareas.forEach(ta => {
+    ta.value = 'Passionate about nature photography and wildlife. Looking to share and learn!';
+    ta.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  const submitBtn = document.querySelector('[aria-label*="Submit"], [aria-label*="Enviar"]');
+  if (submitBtn) submitBtn.click();
+  return { answered: textareas.length };
+}
+```
+
+### MongoDB Schema
+
+```javascript
+// Collection: facebook-groups-joined
+{
+  name: "Group Name",
+  url: "https://facebook.com/groups/...",
+  members: "1.5M",
+  category: "photography",
+  mainAccountStatus: "joined" | "pending_approval",
+  postType: "instant" | "pending_review",
+  joinedAt: ISODate(),
+  discoveryBatch: "2026-02-07"
+}
+```
+
+### Target Categories (Priority Order)
+
+1. **photography** - Main focus
+2. **nature_photography** - Core audience
+3. **wildlife_photography** - High engagement
+4. **flora_chile** - Local niche
+5. **flowers** - Visual content
+
+### Session Limits
+
+| Metric | Value |
+|--------|-------|
+| Groups per session | 20-30 max |
+| Scroll iterations | 5-10 |
+| Delay between joins | 700ms staggered |
+| Break after | 15 joins |
 
 ---
 
