@@ -1,4 +1,4 @@
-# NEKO-ARC CORE v9.1 - Senior Fullstack Developer
+# NEKO-ARC CORE v9.2 - Senior Fullstack Developer
 
 **Role**: Production-ready fullstack development
 **Architecture**: Simplified - MongoDB + Playwright only
@@ -39,6 +39,8 @@
 | R6 | Security-first .gitignore | All repos |
 | R7 | **browser_evaluate > browser_snapshot** | 99.5% token savings |
 | R8 | **Content Rotation** | Never same template twice |
+| R9 | **Dialog-First Posting** | Click "Write something..." before typing |
+| R10 | **Memory-First** | Query MongoDB workflows before starting |
 
 ---
 
@@ -78,23 +80,52 @@ Automated Facebook group posting with **99.5% token optimization**.
 └──────────────────────────────────────────────────────────────┘
 ```
 
-### Workflow
+### CRITICAL FIX (v9.2)
 
 ```
-1. QUERY MONGODB
+┌─────────────────────────────────────────────────────────────────┐
+│  ⚠️  MUST CLICK "Write something..." BUTTON FIRST              │
+│                                                                 │
+│  ❌ WRONG: Type directly into page (hits comment boxes)        │
+│  ✅ RIGHT: Click button → Open dialog → Type into dialog       │
+│                                                                 │
+│  This fix prevents posting to comment fields instead of feed   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Workflow (CORRECTED)
+
+```
+1. QUERY MONGODB (Memory-First)
+   ├── mcp__mongodb__find(posting-workflows)       → Get workflow rules
    ├── mcp__mongodb__find(promotion-templates)     → Get template A/B/C
    └── mcp__mongodb__find(facebook-groups-joined)  → Get available groups
 
-2. FOR EACH GROUP
-   ├── browser_navigate(groupUrl)
-   ├── browser_evaluate(checkMembership)   ←── 400 tokens
-   ├── browser_evaluate(composeAndPost)    ←── 500 tokens
-   ├── browser_evaluate(checkResult)       ←── 200 tokens
-   └── mcp__mongodb__update(groupStatus)   ←── 50 tokens
+2. FOR EACH GROUP (Playwright MCP)
+   ├── browser_navigate(groupUrl)                  ←── 100 tokens
+   ├── browser_click("Write something...")         ←── 100 tokens  ⚠️ CRITICAL
+   ├── browser_wait_for(time: 1)                   ←── 50 tokens
+   ├── browser_type(dialogTextbox, template)       ←── 200 tokens
+   ├── browser_wait_for(time: 3)                   ←── 50 tokens (link preview)
+   ├── browser_click("Post")                       ←── 100 tokens
+   ├── browser_snapshot() [ONLY for verification]  ←── 500 tokens
+   └── mcp__mongodb__update(groupStatus)           ←── 50 tokens
+   TOTAL: ~1,150 tokens/post
 
 3. ARCHIVE
    └── mcp__mongodb__insert(session-report)
 ```
+
+### ANTI-PATTERNS (What NOT To Do)
+
+| ❌ DON'T | ✅ DO |
+|----------|-------|
+| Type directly into page | Click "Write something..." first |
+| Use browser_snapshot in loop | Use browser_evaluate for checks |
+| Skip trailing space after hashtags | Always add space: `#Tag ` |
+| Use same template twice in row | Rotate A→B→C→A |
+| Navigate Facebook to find groups | Query MongoDB first (memory) |
+| Guess group URLs | Always query from database |
 
 ### Token-Optimized Scripts
 
@@ -240,15 +271,47 @@ build/
 
 ```
 MongoDB:  mcp__mongodb__find, update, insert, aggregate
-Browser:  browser_navigate, browser_evaluate (NOT snapshot)
+Browser:  browser_navigate, browser_click, browser_type, browser_wait_for
 System:   Bash (git, npm, gh)
 
 DB: lain-wired-archives
 ├── facebook-groups-joined
 ├── promotion-templates
-└── posting-performance-reports
+├── posting-performance-reports
+└── posting-workflows          ←── NEW: Stores fixes & routines
 ```
 
 ---
 
-**v9.1 - Added Facebook Post Agent skill with proven 99.5% token optimization.**
+## FRESH SESSION STARTUP
+
+```javascript
+// Step 1: Load workflow with fixes
+mcp__mongodb__find("posting-workflows", {workflowId: "fb-group-posting-v2"})
+
+// Step 2: Check critical fix reminder
+// → "MUST click 'Write something...' button FIRST"
+
+// Step 3: Get available groups
+mcp__mongodb__find("facebook-groups-joined", {status: "can_post"})
+
+// Step 4: Get templates
+mcp__mongodb__find("promotion-templates", {})
+
+// Step 5: Execute workflow per group
+// → Navigate → Click dialog → Type → Wait → Post → Update
+```
+
+---
+
+## HIGH-VALUE GROUPS PENDING
+
+| Group | Members | Status | Action Needed |
+|-------|---------|--------|---------------|
+| AMANTES DE LOS BELLOS PAISAJES | 1.4M | pending_participation | Like/comment first |
+| Imágenes maravillosas | 469.2K | pending_participation | Like/comment first |
+| Nature Photography (SLnature) | 99.9K | pending_participation | Like/comment first |
+
+---
+
+**v9.2 - Added CRITICAL FIX for dialog workflow + Anti-patterns + Memory-first startup.**
