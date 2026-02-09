@@ -1,7 +1,7 @@
-# NEKO-ARC CORE v9.2 - Senior Fullstack Developer
+# NEKO-ARC CORE v9.3 - Senior Fullstack Developer
 
 **Role**: Production-ready fullstack development
-**Architecture**: Simplified - MongoDB + Playwright only
+**Architecture**: Master + Lain Sub-Agent (PM2)
 
 ---
 
@@ -12,7 +12,7 @@
 │                    MASTER AGENT (Claude Code)               │
 │                                                             │
 │   🐾 NEKO-ARC        💪 TETORA         🌐 LAIN             │
-│   Tech Lead          Security Guard    Executor            │
+│   Tech Lead          Security Guard    Sub-Agent           │
 ├─────────────────────────────────────────────────────────────┤
 │                         TOOLS                               │
 │                                                             │
@@ -21,8 +21,55 @@
 │   │    MCP      │    │     MCP     │    │   (git,npm) │   │
 │   └─────────────┘    └─────────────┘    └─────────────┘   │
 │                                                             │
-│   ❌ NO unnecessary MCPs (Orchestra, ChromaDB removed)     │
+│                    ┌─────────────────────┐                 │
+│                    │  🌐 LAIN SUB-AGENT  │                 │
+│                    │    localhost:3001   │                 │
+│                    │   (PM2 managed)     │                 │
+│                    │                     │                 │
+│                    │  • ChromaDB (RAG)   │                 │
+│                    │  • Memory API       │                 │
+│                    │  • Chat/Insights    │                 │
+│                    └─────────────────────┘                 │
 └─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## R0: LAIN SUB-AGENT STARTUP (MANDATORY)
+
+**ALWAYS check Lain before any posting/memory operation.**
+
+```bash
+# Step 1: Check if running
+curl -s http://localhost:3001/api/chat/health
+
+# Step 2: If NOT running, start via PM2
+pm2 start "C:\Users\lanitaEmperadora\Documents\github\lain-langchain-agent\ecosystem.config.cjs"
+
+# Step 3: Verify
+pm2 list  # Should show lain-api: online
+```
+
+### Why PM2 over Docker?
+
+| Aspect | PM2 | Docker Compose |
+|--------|-----|----------------|
+| Startup | <2 sec | 10-15 sec |
+| Memory | ~50MB | ~200MB+ |
+| Resources | Minimal | Heavy |
+| Best for | Local dev | Production |
+
+**Decision: PM2 for local development (faster, lighter)**
+
+### PM2 Commands Reference
+
+```bash
+pm2 start ecosystem.config.cjs  # Start
+pm2 stop lain-api               # Stop
+pm2 restart lain-api            # Restart
+pm2 logs lain-api               # View logs
+pm2 list                        # Status
+pm2 save                        # Persist across reboots
 ```
 
 ---
@@ -31,7 +78,8 @@
 
 | # | Rule | Description |
 |---|------|-------------|
-| R1 | MongoDB Atlas | Primary data store via MCP |
+| R0 | **Lain Startup Check** | ALWAYS verify Lain sub-agent before posting |
+| R1 | MongoDB MCP | Persistent data store (groups, templates, reports) |
 | R2 | Private repos | `gh repo create --private` |
 | R3 | Format before commit | Prettier |
 | R4 | E2E testing | Playwright |
@@ -40,7 +88,7 @@
 | R7 | **browser_evaluate > browser_snapshot** | 99.5% token savings |
 | R8 | **Content Rotation** | Never same template twice |
 | R9 | **Dialog-First Posting** | Click "Write something..." before typing |
-| R10 | **Memory-First** | Query MongoDB workflows before starting |
+| R10 | **Lain Memory-First** | Query Lain for insights, archive sessions to Lain |
 
 ---
 
@@ -93,27 +141,91 @@ Automated Facebook group posting with **99.5% token optimization**.
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### Workflow (CORRECTED)
+### Workflow (REFINED v9.3)
 
 ```
-1. QUERY MONGODB (Memory-First)
-   ├── mcp__mongodb__find(posting-workflows)       → Get workflow rules
-   ├── mcp__mongodb__find(promotion-templates)     → Get template A/B/C
-   └── mcp__mongodb__find(facebook-groups-joined)  → Get available groups
+┌─────────────────────────────────────────────────────────────────┐
+│  PHASE 0: LAIN STARTUP CHECK (R0 - MANDATORY)                  │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  curl http://localhost:3001/api/chat/health                    │
+│  └── If NOT running: pm2 start ecosystem.config.cjs            │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
 
-2. FOR EACH GROUP (Playwright MCP)
-   ├── browser_navigate(groupUrl)                  ←── 100 tokens
-   ├── browser_click("Write something...")         ←── 100 tokens  ⚠️ CRITICAL
-   ├── browser_wait_for(time: 1)                   ←── 50 tokens
-   ├── browser_type(dialogTextbox, template)       ←── 200 tokens
-   ├── browser_wait_for(time: 3)                   ←── 50 tokens (link preview)
-   ├── browser_click("Post")                       ←── 100 tokens
-   ├── browser_snapshot() [ONLY for verification]  ←── 500 tokens
-   └── mcp__mongodb__update(groupStatus)           ←── 50 tokens
+1. QUERY LAIN FOR INSIGHTS (Memory-First)
+   ├── GET /api/chat/memory/search?query=posting+workflow
+   ├── GET /api/memory/stats                      → Session stats
+   └── GET /api/memory/groups?status=can_post     → Available groups
+
+2. QUERY MONGODB (Structured Data)
+   ├── mcp__mongodb__find(promotion-templates)    → Get template A/B/C
+   └── mcp__mongodb__find(posting-workflows)      → Get workflow rules
+
+3. FOR EACH GROUP (Playwright MCP)
+   ├── browser_navigate(groupUrl)                 ←── 100 tokens
+   ├── browser_click("Write something...")        ←── 100 tokens  ⚠️ CRITICAL
+   ├── browser_wait_for(time: 1)                  ←── 50 tokens
+   ├── browser_type(dialogTextbox, template)      ←── 200 tokens
+   ├── browser_wait_for(time: 3)                  ←── 50 tokens (link preview)
+   ├── browser_click("Post")                      ←── 100 tokens
+   ├── browser_snapshot() [ONLY for verification] ←── 500 tokens
+   └── mcp__mongodb__update(groupStatus)          ←── 50 tokens
    TOTAL: ~1,150 tokens/post
 
-3. ARCHIVE
-   └── mcp__mongodb__insert(session-report)
+4. ARCHIVE TO BOTH (Dual Storage)
+   ├── POST /api/chat/memory (Lain ChromaDB)      → RAG-searchable insights
+   │   {
+   │     "content": "Session 2026-02-09: 2 posts, Template A+B, 102K reach",
+   │     "metadata": { "type": "session-report", "date": "2026-02-09" }
+   │   }
+   └── mcp__mongodb__insert(session-report)       → Persistent backup
+```
+
+### Lain API Endpoints Reference
+
+```
+BASE: http://localhost:3001
+
+DATA (MongoDB - ALWAYS AVAILABLE):
+├── GET  /api/memory/groups?status=X            → Get groups
+├── GET  /api/memory/stats                      → Posting stats  ⭐ USE THIS
+├── GET  /api/memory/campaigns                  → Recent campaigns
+└── GET  /api/memory/health                     → Health check
+
+CHAT (Lain Agent - ALWAYS AVAILABLE):
+├── POST /api/chat                              → Chat with Lain
+│   { "message": "What groups should I post to?", "agentType": "facebook" }
+├── GET  /api/chat/health                       → Health check
+└── GET  /api/chat/usage                        → Usage stats
+
+RAG MEMORY (ChromaDB - OPTIONAL, requires Docker):
+├── GET  /api/chat/memory/search?query=X&k=5   → Search memories
+├── POST /api/chat/memory                       → Add memory
+└── GET  /api/chat/memory/status                → Check ChromaDB
+    └── If connected: false → Docker not running, skip RAG
+
+PROMOTION (ChromaDB - Posting-specific RAG):
+├── GET  /api/promotion/health                 → ChromaDB connection
+├── GET  /api/promotion/stats                  → Full posting statistics
+├── GET  /api/promotion/groups                 → All posted groups
+├── GET  /api/promotion/ready-to-post          → Groups to revisit
+├── GET  /api/promotion/candidates             → Unposted candidates
+├── GET  /api/promotion/search?query=X         → Search groups
+├── GET  /api/promotion/tips                   → Optimization tips
+├── POST /api/promotion/groups                 → Add posted group
+└── POST /api/promotion/groups/batch           → Batch add groups
+```
+
+### ChromaDB Note
+
+```
+ChromaDB requires Docker Desktop running.
+If Docker is OFF → RAG memory unavailable → Use MongoDB endpoints only
+If Docker is ON  → Full RAG insights available
+
+For local dev (resource-saving): Skip Docker, use MongoDB endpoints
+For deep insights: Start Docker, enable ChromaDB RAG
 ```
 
 ### ANTI-PATTERNS (What NOT To Do)
@@ -285,21 +397,68 @@ DB: lain-wired-archives
 
 ## FRESH SESSION STARTUP
 
+```bash
+# ═══════════════════════════════════════════════════════════════
+# STEP 0: LAIN STARTUP CHECK (MANDATORY - R0)
+# ═══════════════════════════════════════════════════════════════
+
+# Check if Lain is running
+curl -s http://localhost:3001/api/chat/health
+
+# If NOT running (connection refused), start via PM2:
+pm2 start "C:\Users\lanitaEmperadora\Documents\github\lain-langchain-agent\ecosystem.config.cjs"
+
+# Verify status
+pm2 list  # lain-api should be "online"
+```
+
 ```javascript
-// Step 1: Load workflow with fixes
+// ═══════════════════════════════════════════════════════════════
+// STEP 1: QUERY LAIN FOR INSIGHTS
+// ═══════════════════════════════════════════════════════════════
+
+// Ask Lain for session recommendations
+curl -X POST http://localhost:3001/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "What groups should I post to today?", "agentType": "facebook"}'
+
+// Search memory for past learnings
+curl "http://localhost:3001/api/chat/memory/search?query=posting+lessons&k=3"
+
+// Get current stats
+curl "http://localhost:3001/api/memory/stats"
+
+// ═══════════════════════════════════════════════════════════════
+// STEP 2: QUERY MONGODB (Structured Data)
+// ═══════════════════════════════════════════════════════════════
+
 mcp__mongodb__find("posting-workflows", {workflowId: "fb-group-posting-v2"})
-
-// Step 2: Check critical fix reminder
-// → "MUST click 'Write something...' button FIRST"
-
-// Step 3: Get available groups
+mcp__mongodb__find("promotion-templates", {})
 mcp__mongodb__find("facebook-groups-joined", {status: "can_post"})
 
-// Step 4: Get templates
-mcp__mongodb__find("promotion-templates", {})
-
-// Step 5: Execute workflow per group
+// ═══════════════════════════════════════════════════════════════
+// STEP 3: EXECUTE POSTING (Playwright)
+// ═══════════════════════════════════════════════════════════════
 // → Navigate → Click dialog → Type → Wait → Post → Update
+
+// ═══════════════════════════════════════════════════════════════
+// STEP 4: ARCHIVE TO LAIN (RAG Memory)
+// ═══════════════════════════════════════════════════════════════
+
+curl -X POST http://localhost:3001/api/chat/memory \
+  -H "Content-Type: application/json" \
+  -d '{
+    "content": "Session 2026-02-09: Posted to 2 groups (Waterfall 66K, Flores 36K). Template A+B rotation. 1 pending, 1 published. Total reach: 102K.",
+    "metadata": {
+      "type": "session-report",
+      "date": "2026-02-09",
+      "posts": 2,
+      "reach": "102K"
+    }
+  }'
+
+// Also persist to MongoDB for backup
+mcp__mongodb__insert("posting-performance-reports", {...})
 ```
 
 ---
@@ -314,4 +473,27 @@ mcp__mongodb__find("promotion-templates", {})
 
 ---
 
-**v9.2 - Added CRITICAL FIX for dialog workflow + Anti-patterns + Memory-first startup.**
+## WHY LAIN SUB-AGENT?
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  LAIN provides RAG-powered INSIGHTS that MongoDB can't:        │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  MongoDB: "Here are 50 groups with status can_post"            │
+│  Lain:    "Based on past sessions, photography groups          │
+│            between 50K-100K members have 3x better             │
+│            engagement. Prioritize Waterfall Photography."      │
+│                                                                 │
+│  MongoDB: "Session had 2 posts"                                │
+│  Lain:    "Template B performs better in Spanish groups.       │
+│            Consider using B first for ES audiences."           │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+
+ChromaDB stores session learnings → Lain searches them → Insights emerge
+```
+
+---
+
+**v9.3 - Added Lain Sub-Agent integration (PM2), R0 startup check, dual storage (Lain RAG + MongoDB).**
