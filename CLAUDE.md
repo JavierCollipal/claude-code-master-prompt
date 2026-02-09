@@ -1,4 +1,4 @@
-# NEKO-ARC CORE v9.3 - Senior Fullstack Developer
+# NEKO-ARC CORE v9.4 - Senior Fullstack Developer
 
 **Role**: Production-ready fullstack development
 **Architecture**: Master + Lain Sub-Agent (PM2)
@@ -88,7 +88,8 @@ pm2 save                        # Persist across reboots
 | R7 | **browser_evaluate > browser_snapshot** | 99.5% token savings |
 | R8 | **Content Rotation** | Never same template twice |
 | R9 | **Dialog-First Posting** | Click "Write something..." before typing |
-| R10 | **Lain Memory-First** | Query Lain for insights, archive sessions to Lain |
+| R10 | **Autonomous Agent Memory** | Query MongoDB at startup → Agent knows state → Executes |
+| R11 | **Ignore Pending Approval** | Post and move on - don't track/verify admin approval status |
 
 ---
 
@@ -141,6 +142,88 @@ Automated Facebook group posting with **99.5% token optimization**.
 └─────────────────────────────────────────────────────────────────┘
 ```
 
+### R10: AUTONOMOUS AGENT MEMORY (v9.4)
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  GOAL: User says "post to groups" → Agent knows what to do     │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  AGENT STARTUP QUERIES (MongoDB):                              │
+│                                                                 │
+│  1. GET LAST SESSION STATE                                     │
+│     → posting-performance-reports (sort by date desc, limit 1) │
+│     → Knows: last template used, groups posted today           │
+│                                                                 │
+│  2. GET AVAILABLE GROUPS                                        │
+│     → facebook-groups-joined (status: "can_post")              │
+│     → Knows: what's ready to post                              │
+│                                                                 │
+│  3. GET TEMPLATES                                               │
+│     → promotion-templates                                       │
+│     → Knows: A, B, C content + rotation                        │
+│                                                                 │
+│  4. CALCULATE NEXT ACTION                                       │
+│     → Last template was B? → Use C next                        │
+│     → 45 posts today? → 5 more until limit                     │
+│     → Group X already posted? → Skip                           │
+│                                                                 │
+│  5. EXECUTE + SAVE REPORT                                       │
+│     → Post to groups                                           │
+│     → Save session report (agent remembers for next time)      │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Agent Startup Query (copy-paste ready):**
+
+```javascript
+// 1. Last session state
+mcp__mongodb__find("posting-performance-reports", {},
+  {sort: {createdAt: -1}, limit: 1})
+
+// 2. Available groups
+mcp__mongodb__find("facebook-groups-joined",
+  {status: "can_post", category: "photography"})
+
+// 3. Templates
+mcp__mongodb__find("promotion-templates", {})
+
+// → Agent now has full context to execute autonomously
+```
+
+**Session Report Schema (for memory persistence):**
+
+```javascript
+{
+  session: "2026-02-09-session-3",
+  lastTemplate: "C",           // ← Next session starts with A
+  totalPostsToday: 7,          // ← Track daily limit (50)
+  groupsPosted: ["url1", "url2"],
+  groupsRemaining: 23,         // ← Agent knows how much left
+  createdAt: new Date()
+}
+```
+
+### R11: IGNORE PENDING APPROVAL (v9.4 Optimization)
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  🚀  POST AND MOVE ON - DON'T WAIT FOR APPROVAL                │
+│                                                                 │
+│  ❌ OLD: Check if pending → Track status → Wait for approval   │
+│  ✅ NEW: Post → Next group immediately                          │
+│                                                                 │
+│  Why this works:                                                │
+│  • Admin approvals come naturally with time                    │
+│  • Tracking pending status wastes tokens                        │
+│  • Faster workflow = more groups per session                   │
+│  • Facebook notifies you when approved anyway                  │
+│                                                                 │
+│  SAVINGS: ~500 tokens per post (no verification snapshot)      │
+└─────────────────────────────────────────────────────────────────┘
+```
+
 ### Workflow (REFINED v9.3)
 
 ```
@@ -162,24 +245,21 @@ Automated Facebook group posting with **99.5% token optimization**.
    ├── mcp__mongodb__find(promotion-templates)    → Get template A/B/C
    └── mcp__mongodb__find(posting-workflows)      → Get workflow rules
 
-3. FOR EACH GROUP (Playwright MCP)
+3. FOR EACH GROUP (Playwright MCP - R11 Optimized)
    ├── browser_navigate(groupUrl)                 ←── 100 tokens
    ├── browser_click("Write something...")        ←── 100 tokens  ⚠️ CRITICAL
    ├── browser_wait_for(time: 1)                  ←── 50 tokens
    ├── browser_type(dialogTextbox, template)      ←── 200 tokens
    ├── browser_wait_for(time: 3)                  ←── 50 tokens (link preview)
    ├── browser_click("Post")                      ←── 100 tokens
-   ├── browser_snapshot() [ONLY for verification] ←── 500 tokens
-   └── mcp__mongodb__update(groupStatus)          ←── 50 tokens
-   TOTAL: ~1,150 tokens/post
+   └── → NEXT GROUP (R11: no verification needed) ←── 0 tokens
+   TOTAL: ~600 tokens/post (48% faster than v9.3)
 
-4. ARCHIVE TO BOTH (Dual Storage)
-   ├── POST /api/chat/memory (Lain ChromaDB)      → RAG-searchable insights
-   │   {
-   │     "content": "Session 2026-02-09: 2 posts, Template A+B, 102K reach",
-   │     "metadata": { "type": "session-report", "date": "2026-02-09" }
-   │   }
-   └── mcp__mongodb__insert(session-report)       → Persistent backup
+4. ARCHIVE TO MONGODB (R10)
+   └── mcp__mongodb__insert("posting-performance-reports", {
+         session, totalPosts, posts[], metrics, createdAt
+       })
+   → Agent can query later for insights via aggregation
 ```
 
 ### Lain API Endpoints Reference
@@ -238,6 +318,8 @@ For deep insights: Start Docker, enable ChromaDB RAG
 | Use same template twice in row | Rotate A→B→C→A |
 | Navigate Facebook to find groups | Query MongoDB first (memory) |
 | Guess group URLs | Always query from database |
+| Wait for/verify pending approval | Post and move on (R11) |
+| Track admin approval status | Let Facebook notify naturally |
 
 ### Token-Optimized Scripts
 
@@ -337,16 +419,18 @@ For deep insights: Start Docker, enable ChromaDB RAG
 |--------|--------|---------|
 | `browser_snapshot` | 75,000+ | ❌ AVOID |
 | `browser_evaluate` | 200-500 | ✅ USE |
-| **Per post total** | 1,150 | 99.5% saved |
+| **Per post (v9.3)** | 1,150 | 99.5% saved |
+| **Per post (v9.4 R11)** | 600 | 99.7% saved |
 
 ### Cost Comparison
 
 ```
-50-post session:
+50-post session (v9.4 with R11):
 ├── OLD: 50 × 225,000 = 11,250,000 tokens = ~$37
-└── NEW: 50 ×   1,150 =     57,500 tokens = ~$0.19
+├── v9.3: 50 × 1,150 =     57,500 tokens = ~$0.19
+└── v9.4: 50 ×   600 =     30,000 tokens = ~$0.10
 
-SAVINGS: $36.81 per session (99.5%)
+SAVINGS: $36.90 per session (99.7%)
 ```
 
 ---
@@ -395,70 +479,62 @@ DB: lain-wired-archives
 
 ---
 
-## FRESH SESSION STARTUP
+## FRESH SESSION STARTUP (AUTONOMOUS)
 
-```bash
-# ═══════════════════════════════════════════════════════════════
-# STEP 0: LAIN STARTUP CHECK (MANDATORY - R0)
-# ═══════════════════════════════════════════════════════════════
+**User says:** "post to groups" or "continue posting routine"
 
-# Check if Lain is running
-curl -s http://localhost:3001/api/chat/health
-
-# If NOT running (connection refused), start via PM2:
-pm2 start "C:\Users\lanitaEmperadora\Documents\github\lain-langchain-agent\ecosystem.config.cjs"
-
-# Verify status
-pm2 list  # lain-api should be "online"
-```
+**Agent executes automatically:**
 
 ```javascript
 // ═══════════════════════════════════════════════════════════════
-// STEP 1: QUERY LAIN FOR INSIGHTS
+// STEP 1: LOAD AGENT STATE FROM MONGODB (R10)
 // ═══════════════════════════════════════════════════════════════
 
-// Ask Lain for session recommendations
-curl -X POST http://localhost:3001/api/chat \
-  -H "Content-Type: application/json" \
-  -d '{"message": "What groups should I post to today?", "agentType": "facebook"}'
+// Get last session → Know last template, posts today
+const lastSession = mcp__mongodb__find("posting-performance-reports", {},
+  {sort: {createdAt: -1}, limit: 1})
 
-// Search memory for past learnings
-curl "http://localhost:3001/api/chat/memory/search?query=posting+lessons&k=3"
+// Get available groups
+const groups = mcp__mongodb__find("facebook-groups-joined",
+  {status: "can_post", category: "photography"})
 
-// Get current stats
-curl "http://localhost:3001/api/memory/stats"
-
-// ═══════════════════════════════════════════════════════════════
-// STEP 2: QUERY MONGODB (Structured Data)
-// ═══════════════════════════════════════════════════════════════
-
-mcp__mongodb__find("posting-workflows", {workflowId: "fb-group-posting-v2"})
-mcp__mongodb__find("promotion-templates", {})
-mcp__mongodb__find("facebook-groups-joined", {status: "can_post"})
+// Get templates
+const templates = mcp__mongodb__find("promotion-templates", {})
 
 // ═══════════════════════════════════════════════════════════════
-// STEP 3: EXECUTE POSTING (Playwright)
-// ═══════════════════════════════════════════════════════════════
-// → Navigate → Click dialog → Type → Wait → Post → Update
-
-// ═══════════════════════════════════════════════════════════════
-// STEP 4: ARCHIVE TO LAIN (RAG Memory)
+// STEP 2: AGENT CALCULATES NEXT ACTIONS
 // ═══════════════════════════════════════════════════════════════
 
-curl -X POST http://localhost:3001/api/chat/memory \
-  -H "Content-Type: application/json" \
-  -d '{
-    "content": "Session 2026-02-09: Posted to 2 groups (Waterfall 66K, Flores 36K). Template A+B rotation. 1 pending, 1 published. Total reach: 102K.",
-    "metadata": {
-      "type": "session-report",
-      "date": "2026-02-09",
-      "posts": 2,
-      "reach": "102K"
-    }
-  }'
+// From lastSession:
+// - lastTemplate: "B" → Next: "C"
+// - totalPostsToday: 7 → Remaining: 43
+// - groupsPosted: [...] → Skip these
 
-// Also persist to MongoDB for backup
-mcp__mongodb__insert("posting-performance-reports", {...})
+// From groups:
+// - Filter out already posted
+// - Select next batch (e.g., 5 groups)
+
+// ═══════════════════════════════════════════════════════════════
+// STEP 3: EXECUTE POSTING (R9 + R11)
+// ═══════════════════════════════════════════════════════════════
+
+// For each group:
+// → Navigate → Click "Write something..." → Type template → Post → Next
+// (No verification, no waiting for approval - R11)
+
+// ═══════════════════════════════════════════════════════════════
+// STEP 4: SAVE SESSION REPORT (Memory for next time)
+// ═══════════════════════════════════════════════════════════════
+
+mcp__mongodb__insert("posting-performance-reports", {
+  session: "2026-02-09-session-4",
+  lastTemplate: "C",
+  totalPostsToday: 12,  // 7 + 5 new
+  groupsPosted: [...],
+  createdAt: new Date()
+})
+
+// → Next session, agent queries this and continues from "C"
 ```
 
 ---
@@ -470,6 +546,134 @@ mcp__mongodb__insert("posting-performance-reports", {...})
 | AMANTES DE LOS BELLOS PAISAJES | 1.4M | pending_participation | Like/comment first |
 | Imágenes maravillosas | 469.2K | pending_participation | Like/comment first |
 | Nature Photography (SLnature) | 99.9K | pending_participation | Like/comment first |
+
+---
+
+## R19: HIGH-VALUE GROUP FARMING
+
+**Purpose:** Unlock posting in groups that require participation before posting.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  FARMING = GENUINE ENGAGEMENT TO UNLOCK POSTING PRIVILEGES      │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  TOKEN BUDGET: 800 tokens/group (vs 75,000 with snapshots)     │
+│                                                                 │
+│  STORAGE ARCHITECTURE:                                          │
+│  ├── MongoDB: farming-workflows (structured routine)            │
+│  ├── MongoDB: farming-progress (per-group tracking)            │
+│  ├── MongoDB: farming-comments (comment variations)            │
+│  └── Lain/ChromaDB: semantic search for insights               │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Farming Workflow (Token-Optimized)
+
+```javascript
+// STEP 1: Navigate (100 tokens)
+browser_navigate(groupUrl)
+
+// STEP 2: Scroll to load posts (100 tokens)
+browser_evaluate(`window.scrollBy(0, 800); return 'scrolled'`)
+
+// STEP 3: Like 5 posts with delays (200 tokens)
+browser_evaluate(`(() => {
+  const likes = [...document.querySelectorAll('[aria-label="Like"]')]
+    .filter(b => !b.closest('[aria-pressed="true"]'))
+    .slice(0,5);
+  likes.forEach((btn,i) => setTimeout(() => btn.click(), i*2500));
+  return likes.length + ' posts liked';
+})()`)
+
+// STEP 4: Find and click comment box (150 tokens)
+browser_evaluate(`(() => {
+  const boxes = [...document.querySelectorAll('[aria-label*="comment" i]')];
+  if(boxes[0]) boxes[0].click();
+  return boxes.length > 0 ? 'ready' : 'not_found';
+})()`)
+
+// STEP 5: Get random comment from MongoDB
+const comments = mcp__mongodb__find("farming-comments", {language: "ES"})
+const randomComment = comments[0].comments[Math.floor(Math.random() * 8)]
+
+// STEP 6: Type comment (150 tokens)
+browser_type(commentBox, randomComment)
+
+// STEP 7: Submit (100 tokens)
+browser_click(submitButton)
+
+// TOTAL: ~800 tokens/group
+```
+
+### Farming Schedule
+
+| Day | Likes | Comments | Goal |
+|-----|-------|----------|------|
+| 1 | 5 | 0 | Initial visibility |
+| 2 | 5 | 2 | Build presence |
+| 3 | 5 | 2 | Establish reputation |
+| 4 | 3 | 1 | Attempt posting |
+
+### Anti-Bot Measures
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  CRITICAL: FARMING REQUIRES MORE CAUTION THAN POSTING          │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  • Random delays: 2-5 sec between likes                        │
+│  • Max 1 group per 10 minutes                                  │
+│  • NEVER repeat same comment twice                              │
+│  • Use comment pool from MongoDB (32 variations)               │
+│  • Track progress per group in farming-progress                │
+│  • Wait 24h between farming sessions on same group             │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### MongoDB Collections (Farming)
+
+```javascript
+// farming-workflows
+{
+  workflowId: "high-value-group-farming-v1",
+  tokenBudget: { perGroup: 800, perSession: 2400 },
+  schedule: { day1: {likes:5}, day2: {likes:5, comments:2}, ... }
+}
+
+// farming-progress
+{
+  groupName: "AMANTES DE LOS BELLOS PAISAJES",
+  groupUrl: "https://facebook.com/groups/...",
+  members: "1.4M",
+  priority: 1,
+  status: "in_progress",  // not_started, in_progress, ready_to_post
+  day1: { completed: true, likes: 5, comments: 0 },
+  day2: { completed: false, likes: 0, comments: 0 }
+}
+
+// farming-comments (32 variations)
+{
+  category: "nature",
+  language: "ES",
+  comments: ["Que hermosa captura!", "Me encanta la composicion", ...]
+}
+```
+
+### Quick Reference
+
+```
+User says: "farm high-value groups" or "engage with pending groups"
+
+Agent executes:
+1. mcp__mongodb__find("farming-progress", {status: "not_started"})
+2. mcp__mongodb__find("farming-comments", {language: group.language})
+3. Execute workflow (navigate → scroll → like → comment)
+4. mcp__mongodb__update("farming-progress", {day1: {completed: true}})
+5. Wait 10 min → Next group
+```
 
 ---
 
@@ -496,4 +700,4 @@ ChromaDB stores session learnings → Lain searches them → Insights emerge
 
 ---
 
-**v9.3 - Added Lain Sub-Agent integration (PM2), R0 startup check, dual storage (Lain RAG + MongoDB).**
+**v9.5 - R19 High-Value Group Farming. Token-optimized engagement routine (800 tokens/group). MongoDB + Lain dual storage for workflows and comment variations.**
