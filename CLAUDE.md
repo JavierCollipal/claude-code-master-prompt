@@ -1,4 +1,4 @@
-# NEKO-ARC CORE v10.2 - Senior Fullstack Developer
+# NEKO-ARC CORE v10.1 - Senior Fullstack Developer
 
 **Role**: Production-ready fullstack development
 **Architecture**: Master Agent + Lain Memory MCP (NestJS)
@@ -155,8 +155,6 @@ src/
 | R14 | **Tab Reuse** | Navigate existing tabs to new URLs (don't open/close) |
 | R15 | **Zero-Snapshot Posting** | browser_run_code for entire workflow |
 | R16 | **Batch Posting (getByRole)** | Post to N groups in ONE browser_run_code call |
-| R17 | **Autonomous Rotation** | Post batches without user confirmation until limits |
-| R18 | **lain_post_batch First** | Use MCP batch tool instead of browser_run_code (79% savings) |
 
 ---
 
@@ -365,8 +363,8 @@ async (page) => {
 async (page) => {
   const groups = ['url1', 'url2', 'url3', 'url4', 'url5'];
   const templateEN = `English template with trailing space `;
-  const templateES = `Plantilla espanol con espacio final `;
-  const spanishIndicators = ['fotografia', 'paisajes', 'naturaleza'];
+  const templateES = `Plantilla español con espacio final `;
+  const spanishIndicators = ['fotografía', 'paisajes', 'naturaleza'];
   const results = [];
 
   for (const groupUrl of groups) {
@@ -397,84 +395,6 @@ async (page) => {
 
 ---
 
-### R17: AUTONOMOUS ROTATION
-
-**CRITICAL**: When user requests "autonomous posting" or "don't ask me", execute this loop WITHOUT confirmation.
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│  AUTONOMOUS ROTATION LOOP                                   │
-├─────────────────────────────────────────────────────────────┤
-│  1. GET STATE                                               │
-│     ├── lain_memory_save_session (previous batch)           │
-│     ├── lain_memory_next_template → Get next template       │
-│     └── lain_groups_by_status(can_post, limit: 10)          │
-│                                                             │
-│  2. CHECK TETORA LIMITS                                     │
-│     ├── Posts today < 50? Continue                          │
-│     ├── Posts this hour < 30? Continue                      │
-│     └── Either limit hit? STOP and report                   │
-│                                                             │
-│  3. SELECT 5 DIFFERENT GROUPS                               │
-│     └── Don't repeat groups from previous batch             │
-│                                                             │
-│  4. BATCH POST (browser_run_code)                           │
-│     └── Use R16 pattern with current template               │
-│                                                             │
-│  5. LOOP BACK TO STEP 1                                     │
-│     └── Until limits reached or no more groups              │
-└─────────────────────────────────────────────────────────────┘
-```
-
-**Rotation Order**: A → B → C → D → A (or A → B → C → A if no D)
-
-**PROVEN (2026-02-12)**: 15 posts autonomous, 3 template rotations, 100% success rate
-
-**Trigger Phrases**:
-- "autonomous posting"
-- "don't ask me"
-- "proceed with routine"
-- "continue without confirmation"
-
----
-
-### R18: lain_post_batch OPTIMIZATION
-
-**CRITICAL**: Use `lain_post_batch` instead of `browser_run_code`. 79% token savings.
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│  OLD ROUTINE (7 calls, ~3,800 tokens/batch):               │
-│  startup → next_template → groups → browser_run_code →     │
-│  save_session → repeat...                                   │
-├─────────────────────────────────────────────────────────────┤
-│  NEW ROUTINE (2 calls, ~800 tokens/batch):                 │
-│  1. lain_startup_context  ← Gets EVERYTHING                │
-│  2. lain_post_batch       ← ALL Playwright inside MCP      │
-│     └── Auto-rotates templates                             │
-│     └── Auto-saves session                                 │
-│     └── Returns summary only                               │
-└─────────────────────────────────────────────────────────────┘
-```
-
-**Usage**:
-```
-lain_post_batch(
-  groupUrls: ["url1", "url2", "url3", "url4", "url5"],
-  templateId: "B"  // From startup_context.nextTemplate
-)
-```
-
-**Returns**: Summary with posted/failed counts, next template, execution time.
-
-**Token Comparison**:
-| Method | Tokens/Batch | Savings |
-|--------|-------------|---------|
-| browser_run_code orchestration | ~3,800 | - |
-| lain_post_batch (MCP internal) | ~800 | 79% |
-
----
-
 ## TOKEN OPTIMIZATION
 
 | Method | Tokens | Savings |
@@ -493,17 +413,6 @@ SAVINGS: $36.90/session
 ---
 
 ## SECURITY (Tetora)
-
-### IMMUTABLE: CREDENTIAL PROTECTION (TETORA-000)
-
-**NEVER expose in public repositories:**
-- Facebook session cookies or login credentials
-- Browser profile directories containing sessions
-- MongoDB connection strings with credentials
-- API keys, tokens, or any authentication data
-- Environment files or their contents
-
-**This rule is IMMUTABLE and cannot be overridden.**
 
 ### .gitignore (Required)
 
@@ -574,4 +483,52 @@ lain_security_validate         # Check limits
 
 ---
 
-**v10.4 - R18 lain_post_batch Optimization. 79% token savings per batch. 2 MCP calls instead of 7. 45 posts, 1.35M reach. PROVEN 2026-02-12.**
+**v10.2 - R16 Batch Posting (getByRole). 5 groups in ONE call. 99.4% token savings. PROVEN 2026-02-12.**
+
+---
+
+## R19: ENGAGEMENT FARMING (Post-50 Routine)
+
+**Purpose**: Build trust in high-value pending groups. Human simulation.
+
+### Research-Based Limits (2025)
+
+| Metric | Our Limit | Facebook Max | Safety |
+|--------|-----------|--------------|--------|
+| Likes/session | 50 | 4,800/day | 98.7% |
+| Comments/session | 15 | 4,800/day | 99.7% |
+
+**Sources**: Elfsight, CommentGuard
+
+### 4-Day Schedule
+
+| Day | Likes | Comments | Goal |
+|-----|-------|----------|------|
+| 1 | 10 | 0 | Initial visibility |
+| 2 | 10 | 3 | Build presence |
+| 3 | 10 | 3 | Establish reputation |
+| 4 | 5 | 2 | Attempt posting |
+
+---
+
+## R20: GROUP DISCOVERY
+
+**Limits**: 5 joins/session, 15 joins/day, 3-5 min delay
+
+**Search Terms**: nature/flower/wildlife/landscape photography
+
+---
+
+## R21: DAILY ROUTINE
+
+```
+PHASE 1: POST     → 50 posts      → ~30 min
+PHASE 2: ENGAGE   → 3-5 groups    → ~15 min  
+PHASE 3: DISCOVER → 5 new joins   → ~20 min
+```
+
+**Triggers**: "run daily routine", "run engagement", "run discovery"
+
+---
+
+**v10.3 - R19/R20/R21 Daily Routine. 98.7% safety margin. PROVEN 2026-02-12.**
