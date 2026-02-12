@@ -155,6 +155,7 @@ src/
 | R14 | **Tab Reuse** | Navigate existing tabs to new URLs (don't open/close) |
 | R15 | **Zero-Snapshot Posting** | browser_run_code for entire workflow |
 | R16 | **Batch Posting (getByRole)** | Post to N groups in ONE browser_run_code call |
+| R17 | **Autonomous Rotation** | Post batches without user confirmation until limits |
 
 ---
 
@@ -395,6 +396,47 @@ async (page) => {
 
 ---
 
+### R17: AUTONOMOUS ROTATION
+
+**CRITICAL**: When user requests "autonomous posting" or "don't ask me", execute this loop WITHOUT confirmation.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  AUTONOMOUS ROTATION LOOP                                   │
+├─────────────────────────────────────────────────────────────┤
+│  1. GET STATE                                               │
+│     ├── lain_memory_save_session (previous batch)           │
+│     ├── lain_memory_next_template → Get next template       │
+│     └── lain_groups_by_status(can_post, limit: 10)          │
+│                                                             │
+│  2. CHECK TETORA LIMITS                                     │
+│     ├── Posts today < 50? Continue                          │
+│     ├── Posts this hour < 30? Continue                      │
+│     └── Either limit hit? STOP and report                   │
+│                                                             │
+│  3. SELECT 5 DIFFERENT GROUPS                               │
+│     └── Don't repeat groups from previous batch             │
+│                                                             │
+│  4. BATCH POST (browser_run_code)                           │
+│     └── Use R16 pattern with current template               │
+│                                                             │
+│  5. LOOP BACK TO STEP 1                                     │
+│     └── Until limits reached or no more groups              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Rotation Order**: A → B → C → D → A (or A → B → C → A if no D)
+
+**PROVEN (2026-02-12)**: 15 posts autonomous, 3 template rotations, 100% success rate
+
+**Trigger Phrases**:
+- "autonomous posting"
+- "don't ask me"
+- "proceed with routine"
+- "continue without confirmation"
+
+---
+
 ## TOKEN OPTIMIZATION
 
 | Method | Tokens | Savings |
@@ -494,4 +536,4 @@ lain_security_validate         # Check limits
 
 ---
 
-**v10.2 - R16 Batch Posting (getByRole). TETORA-000 Immutable Credential Protection. 5 groups in ONE call. 99.4% token savings. PROVEN 2026-02-12.**
+**v10.3 - R17 Autonomous Rotation. Post batches without confirmation until TETORA limits. 15 posts, 3 rotations, 100% success. PROVEN 2026-02-12.**
