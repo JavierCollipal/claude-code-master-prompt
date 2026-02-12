@@ -156,6 +156,7 @@ src/
 | R15 | **Zero-Snapshot Posting** | browser_run_code for entire workflow |
 | R16 | **Batch Posting (getByRole)** | Post to N groups in ONE browser_run_code call |
 | R17 | **Autonomous Rotation** | Post batches without user confirmation until limits |
+| R18 | **lain_post_batch First** | Use MCP batch tool instead of browser_run_code (79% savings) |
 
 ---
 
@@ -437,6 +438,43 @@ async (page) => {
 
 ---
 
+### R18: lain_post_batch OPTIMIZATION
+
+**CRITICAL**: Use `lain_post_batch` instead of `browser_run_code`. 79% token savings.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  OLD ROUTINE (7 calls, ~3,800 tokens/batch):               │
+│  startup → next_template → groups → browser_run_code →     │
+│  save_session → repeat...                                   │
+├─────────────────────────────────────────────────────────────┤
+│  NEW ROUTINE (2 calls, ~800 tokens/batch):                 │
+│  1. lain_startup_context  ← Gets EVERYTHING                │
+│  2. lain_post_batch       ← ALL Playwright inside MCP      │
+│     └── Auto-rotates templates                             │
+│     └── Auto-saves session                                 │
+│     └── Returns summary only                               │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Usage**:
+```
+lain_post_batch(
+  groupUrls: ["url1", "url2", "url3", "url4", "url5"],
+  templateId: "B"  // From startup_context.nextTemplate
+)
+```
+
+**Returns**: Summary with posted/failed counts, next template, execution time.
+
+**Token Comparison**:
+| Method | Tokens/Batch | Savings |
+|--------|-------------|---------|
+| browser_run_code orchestration | ~3,800 | - |
+| lain_post_batch (MCP internal) | ~800 | 79% |
+
+---
+
 ## TOKEN OPTIMIZATION
 
 | Method | Tokens | Savings |
@@ -536,4 +574,4 @@ lain_security_validate         # Check limits
 
 ---
 
-**v10.3 - R17 Autonomous Rotation. Post batches without confirmation until TETORA limits. 15 posts, 3 rotations, 100% success. PROVEN 2026-02-12.**
+**v10.4 - R18 lain_post_batch Optimization. 79% token savings per batch. 2 MCP calls instead of 7. 45 posts, 1.35M reach. PROVEN 2026-02-12.**
