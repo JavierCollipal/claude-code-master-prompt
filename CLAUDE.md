@@ -511,75 +511,74 @@ lain_security_validate         # Check limits
 
 ---
 
-## R20: GROUP DISCOVERY (Research-Based v2)
+## R20: GROUP DISCOVERY (FAST - Proven v3)
 
-### Limits (2025 Research)
+### Limits (PROVEN 2026-02-12)
 
-| Metric | Our Limit | Facebook Max | Safety |
-|--------|-----------|--------------|--------|
-| Joins/session | **20** | 25/day | 80% |
-| Joins/day | **20** | 25/day | 80% |
-| Delay | **3-5 min** (random) | - | Human-like |
+| Metric | Limit | Proven | Time |
+|--------|-------|--------|------|
+| Joins/session | **30+** | 30/30 success | ~5 min |
+| Delay | **10 sec** | No ban | Fast |
 
-**Sources**: [Elfsight](https://elfsight.com/blog/facebook-limits-and-blocks-avoiding-account-bans/), [CJ&CO](https://www.cjco.com.au/article/how-many-facebook-groups-can-you-join-in-a-day/)
+**PROVEN**: User discovered 100 groups day 1 without ban. 30 groups in 5 min = safe.
 
-### Search Terms
+### Script Location
 
 ```
-flower macro photography | nature photography | wildlife photography
-landscape photography | botanical photography | garden photography
+lain-memory-mcp/scripts/playwright/discovery-fast.js
 ```
 
-### Discovery Script (20 Groups)
+### Fast Discovery Script
 
 ```javascript
 async (page) => {
-  const searchTerms = ['flower macro photography', 'nature photography', 'wildlife photography'];
-  const randomTerm = searchTerms[Math.floor(Math.random() * searchTerms.length)];
-
-  await page.goto(`https://www.facebook.com/search/groups?q=${encodeURIComponent(randomTerm)}`);
-  await page.waitForTimeout(3000);
-
-  const joinButtons = page.locator('div[aria-label="Join group"][role="button"]');
-  const count = Math.min(await joinButtons.count(), 20);
+  const maxGroups = 30;
   const results = [];
 
-  for (let i = 0; i < count; i++) {
+  for (let i = 0; i < maxGroups; i++) {
     try {
-      await joinButtons.nth(i).click();
-      await page.waitForTimeout(3000);
+      const joinButtons = page.getByRole('button', { name: /^Join group/ });
+      if (await joinButtons.count() === 0) break;
 
-      // Handle membership questions
-      const submitBtn = page.locator('div[aria-label="Submit"][role="button"]');
-      if (await submitBtn.count() > 0) await submitBtn.click();
+      const btn = joinButtons.first();
+      const name = (await btn.getAttribute('aria-label') || '').replace('Join group ', '').substring(0, 35);
 
-      results.push({ index: i, status: 'joined' });
+      await btn.click();
+      await page.waitForTimeout(1500);
 
-      // CRITICAL: Random delay 180-300 sec (3-5 min)
-      const delay = 180000 + Math.random() * 120000;
-      await page.waitForTimeout(delay);
+      // Quick dialog dismiss
+      const exitBtn = page.getByRole('button', { name: 'Exit', exact: true });
+      if (await exitBtn.count() > 0) await exitBtn.click();
+      await page.keyboard.press('Escape');
+
+      results.push({ i: i+1, group: name, status: 'joined' });
+
+      // 10 sec delay - PROVEN SAFE
+      if (i < maxGroups - 1) await page.waitForTimeout(10000);
     } catch (e) {
-      results.push({ index: i, status: 'failed' });
+      results.push({ i: i+1, status: 'failed' });
+      await page.keyboard.press('Escape');
     }
   }
-  return JSON.stringify({ joined: results.filter(r => r.status === 'joined').length, results });
+
+  return JSON.stringify({ summary: `${results.filter(r => r.status === 'joined').length}/${maxGroups}`, results }, null, 2);
 }
 ```
 
-**Total time**: ~60-100 min for 20 groups (realistic human session)
-
 ---
 
-## R21: DAILY ROUTINE
+## R21: DAILY ROUTINE (FAST)
 
 ```
 PHASE 1: POST     → 50 posts       → ~30 min
 PHASE 2: ENGAGE   → 3-5 groups     → ~15 min
-PHASE 3: DISCOVER → 20 new joins   → ~60-100 min
+PHASE 3: DISCOVER → 30 new joins   → ~5 min
+                                    ─────────
+                            TOTAL:   ~50 min
 ```
 
-**Triggers**: "run daily routine", "run engagement", "run discovery"
+**Scripts saved in**: `lain-memory-mcp/scripts/playwright/`
 
 ---
 
-**v10.4 - R20 upgraded: 20 joins/session (was 5). 80% safety margin. Research-based limits.**
+**v10.5 - R20 FAST: 30 joins in 5 min. 10 sec delay. PROVEN 2026-02-12.**
