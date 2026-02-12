@@ -434,10 +434,10 @@ build/
 |-------|-------|
 | Posts/session | 50 |
 | Posts/hour | 30 |
-| Joins/session | 15 |
-| Joins/day | 25 |
+| Joins/session | **20** |
+| Joins/day | **20** |
 | Delay between posts | 2-5 sec |
-| Delay between joins | 3-5 min |
+| Delay between joins | 3-5 min (random) |
 
 ---
 
@@ -511,24 +511,75 @@ lain_security_validate         # Check limits
 
 ---
 
-## R20: GROUP DISCOVERY
+## R20: GROUP DISCOVERY (Research-Based v2)
 
-**Limits**: 5 joins/session, 15 joins/day, 3-5 min delay
+### Limits (2025 Research)
 
-**Search Terms**: nature/flower/wildlife/landscape photography
+| Metric | Our Limit | Facebook Max | Safety |
+|--------|-----------|--------------|--------|
+| Joins/session | **20** | 25/day | 80% |
+| Joins/day | **20** | 25/day | 80% |
+| Delay | **3-5 min** (random) | - | Human-like |
+
+**Sources**: [Elfsight](https://elfsight.com/blog/facebook-limits-and-blocks-avoiding-account-bans/), [CJ&CO](https://www.cjco.com.au/article/how-many-facebook-groups-can-you-join-in-a-day/)
+
+### Search Terms
+
+```
+flower macro photography | nature photography | wildlife photography
+landscape photography | botanical photography | garden photography
+```
+
+### Discovery Script (20 Groups)
+
+```javascript
+async (page) => {
+  const searchTerms = ['flower macro photography', 'nature photography', 'wildlife photography'];
+  const randomTerm = searchTerms[Math.floor(Math.random() * searchTerms.length)];
+
+  await page.goto(`https://www.facebook.com/search/groups?q=${encodeURIComponent(randomTerm)}`);
+  await page.waitForTimeout(3000);
+
+  const joinButtons = page.locator('div[aria-label="Join group"][role="button"]');
+  const count = Math.min(await joinButtons.count(), 20);
+  const results = [];
+
+  for (let i = 0; i < count; i++) {
+    try {
+      await joinButtons.nth(i).click();
+      await page.waitForTimeout(3000);
+
+      // Handle membership questions
+      const submitBtn = page.locator('div[aria-label="Submit"][role="button"]');
+      if (await submitBtn.count() > 0) await submitBtn.click();
+
+      results.push({ index: i, status: 'joined' });
+
+      // CRITICAL: Random delay 180-300 sec (3-5 min)
+      const delay = 180000 + Math.random() * 120000;
+      await page.waitForTimeout(delay);
+    } catch (e) {
+      results.push({ index: i, status: 'failed' });
+    }
+  }
+  return JSON.stringify({ joined: results.filter(r => r.status === 'joined').length, results });
+}
+```
+
+**Total time**: ~60-100 min for 20 groups (realistic human session)
 
 ---
 
 ## R21: DAILY ROUTINE
 
 ```
-PHASE 1: POST     → 50 posts      → ~30 min
-PHASE 2: ENGAGE   → 3-5 groups    → ~15 min  
-PHASE 3: DISCOVER → 5 new joins   → ~20 min
+PHASE 1: POST     → 50 posts       → ~30 min
+PHASE 2: ENGAGE   → 3-5 groups     → ~15 min
+PHASE 3: DISCOVER → 20 new joins   → ~60-100 min
 ```
 
 **Triggers**: "run daily routine", "run engagement", "run discovery"
 
 ---
 
-**v10.3 - R19/R20/R21 Daily Routine. 98.7% safety margin. PROVEN 2026-02-12.**
+**v10.4 - R20 upgraded: 20 joins/session (was 5). 80% safety margin. Research-based limits.**
