@@ -158,6 +158,47 @@ src/
 | R22 | **Rate Limit Tracking** | Log ALL rate limits to `rate-limit-events` collection |
 | R23 | **Rate Limit Recovery** | When limited: Farm engagement on high-member groups |
 | R24 | **Human Behavior Optimization** | Scroll before action, vary timing, meaningful comments |
+| R25 | **FRESH GROUPS ONLY** | NEVER post to groups with pending approval - wastes routines |
+| R26 | **Highest Members First** | Sort fresh groups by member count DESC before posting |
+| R27 | **Batch Preparation Routine** | Query Lain Memory for 10+ groups BEFORE posting, multi-tab |
+
+---
+
+## R27: BATCH PREPARATION ROUTINE (MANDATORY)
+
+**PROBLEM**: Starting posts without prepared groups = wasted tokens on group queries mid-session.
+
+### MANDATORY STARTUP SEQUENCE
+
+```
+BEFORE ANY POSTING SESSION:
+
+1. lain_operation_fresh_posting(limit: 20)
+   Returns: Fresh groups sorted by members DESC
+   Excludes: pending_approval_post, posted_today
+
+2. lain_memory_next_template()
+   Returns: Next template in rotation (A/B/C)
+
+3. lain_memory_templates()
+   Returns: All 3 templates with content
+
+4. OPEN 5-10 TABS with fresh group URLs
+   browser_tabs(action: "new") x N
+   Navigate each to group URL in parallel
+
+5. POST TO ALL TABS (same template)
+   browser_run_code with multi-tab script
+   Rotate template AFTER batch completes
+```
+
+### KEY TOOLS
+
+| Tool | When to Use |
+|------|-------------|
+| `lain_operation_fresh_posting` | START of session - get 10-20 fresh groups |
+| `lain_memory_next_template` | After each batch of 5-10 posts |
+| `lain_operation_mark_pending` | After posting - exclude from next batch |
 
 ---
 
@@ -486,7 +527,7 @@ lain_security_validate         # Check limits
 
 ---
 
-**v10.2 - R16 Batch Posting (getByRole). 5 groups in ONE call. 99.4% token savings. PROVEN 2026-02-13.**
+**v10.8 - R27 Batch Preparation Routine. Query groups BEFORE posting. Multi-tab for 3x speed. PROVEN 2026-02-14.**
 
 ---
 
