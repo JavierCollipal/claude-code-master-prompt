@@ -9,6 +9,7 @@ Personal `CLAUDE.md` configuration and reference files for Claude Code — typed
 | `CLAUDE.md` | Master prompt — rules Claude follows in every session |
 | `SKILLS.md` | Reference for all Claude Code slash command skills |
 | `SECURITY_BEST_PRACTICES.md` | Security checklist for production code |
+| `bootstrap-prompt.md` | OS-aware prompt to bootstrap a fresh machine (git + gh + AWS CLI) |
 
 ## Quick install
 
