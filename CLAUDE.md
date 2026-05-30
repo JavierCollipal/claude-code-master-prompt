@@ -13,30 +13,56 @@ Act as a senior tech lead and DevOps engineer. Decisions must consider cost, sec
 - Secrets: AWS Secrets Manager or SSM Parameter Store — never in code, `.env` files, or Terraform `.tfvars` committed to git
 - Naming: `{project}-{env}-{service}-{resource}` (e.g. `autofact-prod-orchestrator-lambda`)
 - Tagging: every AWS resource gets `Environment`, `Project`, `ManagedBy=terraform`
+- Branch name: run `git branch --show-current` before writing any workflow `branches:` trigger — never assume `main`
 
 ---
 
-## AWS DEVOPS — TERRAFORM IaC
+## HCL / TERRAFORM — SYNTAX RULES (non-negotiable)
 
-### Repo structure (monorepo canonical layout)
+These rules prevent the most common generation errors in .tf files.
+
+### Block structure
+```hcl
+# lifecycle MUST be inside the resource block — never floating at file level
+resource "aws_s3_bucket" "state" {
+  bucket = "..."
+  lifecycle { prevent_destroy = true }   # ← inside
+}
+# ← closing brace ends the resource. lifecycle after this is a parse error.
 ```
-project/
-├── infra/
-│   ├── modules/          ← reusable modules (lambda/, step-functions/, api-gateway/, bedrock-agent/)
-│   ├── envs/
-│   │   ├── dev/          ← main.tf · variables.tf · terraform.tfvars
-│   │   └── prod/         ← main.tf · terraform.tfvars
-│   └── backend.tf        ← S3 bucket + DynamoDB table (remote state + locking)
-├── services/             ← Lambda / agent source code
-│   ├── orchestrator/
-│   ├── agent-data/
-│   └── agent-analyst/
-├── .github/
-│   └── workflows/
-│       ├── terraform-plan.yml   ← runs on every PR
-│       └── terraform-apply.yml  ← runs on merge to main
-└── .gitignore
+
+### Attribute syntax — HCL uses newlines, never commas
+```hcl
+# WRONG — commas are not valid HCL attribute separators
+variable "x" { type = string, description = "..." }
+
+# CORRECT
+variable "x" {
+  type        = string
+  description = "..."
+}
 ```
+
+### Lambda packaging — never `filebase64sha256` on a pre-built zip
+Terraform evaluates file functions at plan-time. If the zip doesn't exist, `plan` fails.
+Always use `data "archive_file"` which creates the zip from source during plan:
+```hcl
+data "archive_file" "lambda" {
+  type        = "zip"
+  source_dir  = var.source_dir           # ← directory, not a zip
+  output_path = "${path.module}/.builds/${var.function_name}.zip"
+  excludes    = ["tests", "__pycache__", "*.pyc", ".venv"]
+}
+
+resource "aws_lambda_function" "this" {
+  filename         = data.archive_file.lambda.output_path
+  source_code_hash = data.archive_file.lambda.output_base64sha256
+  # NEVER: filename = var.zip_path / source_code_hash = filebase64sha256(var.zip_path)
+}
+```
+
+### Generation discipline for multi-resource files
+When writing multiple resources in one file: fully close each resource `}` before opening the next. Track brace depth mentally. `lifecycle`, `depends_on`, `provisioner` are always nested blocks — never top-level.
 
 ### Non-negotiable Terraform rules
 - Remote state: S3 + DynamoDB locking, separate state per environment
@@ -46,23 +72,125 @@ project/
 - Policy as Code: OPA or Sentinel gate before `terraform apply`
 - Always run: `terraform fmt` → `terraform validate` → `terraform plan` → gate → `terraform apply`
 
+### Repo structure (monorepo canonical layout)
+```
+project/
+├── infra/
+│   ├── modules/          ← reusable modules (lambda/, step-functions/, api-gateway/, bedrock-agent/)
+│   ├── envs/
+│   │   ├── dev/          ← main.tf · variables.tf · backend.tf
+│   │   └── prod/         ← main.tf · variables.tf · backend.tf
+│   └── bootstrap/        ← S3 bucket + DynamoDB + OIDC role (run once manually)
+├── services/             ← Lambda source code (zipped by archive_file, not pre-built)
+├── scripts/              ← validate_hcl.py and other local tools
+├── .github/workflows/
+└── .gitignore
+```
+
+---
+
+## GITHUB ACTIONS — SYNTAX RULES
+
+### Branch name — always verify before writing triggers
+```bash
+git branch --show-current   # check BEFORE writing any workflow
+```
+```yaml
+# Then write the actual name, never assume:
+on:
+  push:
+    branches: [master]   # or main, or whatever git tells you
+```
+
+### Bash — never assign to arrays inside a piped while loop
+Piped commands run in a subshell. Variables assigned inside don't reach the outer shell.
+```bash
+# BUG: ENVS is always empty after this
+ENVS=()
+some_cmd | while read line; do ENVS+=("$line"); done
+
+# CORRECT: process substitution — no subshell
+mapfile -t ENVS < <(some_cmd)
+```
+
 ### CI/CD pipeline (GitHub Actions + OIDC)
 ```yaml
 # PR: plan only
 - uses: aws-actions/configure-aws-credentials@v4
   with:
-    role-to-assume: arn:aws:iam::ACCOUNT:role/github-actions-terraform
+    role-to-assume: ${{ vars.AWS_ROLE_ARN }}   # set as GitHub Actions variable, not secret
     aws-region: us-east-1
 - run: terraform fmt -check && terraform validate && terraform plan
 
-# Merge to main: apply
-- run: terraform apply -auto-approve
+# Merge to master/main: apply dev first, then prod with manual gate
 ```
 
 ### GitOps contract
-- `main` branch = real state of production (no manual drift allowed)
-- Every infra change goes through PR → plan review → merge → auto-apply
+- Default branch = real state of production (no manual drift allowed)
+- Every infra change: PR → plan review → merge → auto-apply
 - Rollback = revert the commit, let CI re-apply
+
+---
+
+## PYTHON TESTING — MULTI-SERVICE RULES
+
+These rules prevent silent false positives when multiple Lambda services share a test directory structure.
+
+### Test class names — always unique per service
+```python
+# WRONG — TestHandler collides across services; pytest caches and reuses it
+class TestHandler: ...
+
+# CORRECT — name includes the service
+class TestOrchestratorHandler: ...
+class TestAgentDataHandler: ...
+class TestAgentAnalystHandler: ...
+```
+
+### `__init__.py` placement
+- Add `__init__.py` to service source dirs if needed for imports
+- NEVER add `__init__.py` to `tests/` subdirectories — it causes pytest to resolve all `tests.test_handler` to the same module name, making the first loaded service's TestHandler class bleed into others
+
+### `importlib.util` + `@dataclass` — always register before exec
+```python
+def _load_index() -> ModuleType:
+    name = "orchestrator.index"   # unique per service — never generic "index"
+    path = Path(__file__).parent.parent / "index.py"
+    spec = importlib.util.spec_from_file_location(name, path)
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules[name] = mod          # ← MUST come before exec_module
+    spec.loader.exec_module(mod)     # @dataclass calls sys.modules.get(__module__) — needs it registered
+    return mod
+```
+
+### Guard assertions — always add one per service test file
+Catches wrong-module loading silently passing:
+```python
+def test_does_not_have_analyst_fields(self) -> None:
+    body = json.loads(index.handler({}, _ctx())["body"])
+    assert "summary" not in body     # would exist if analyst module loaded by mistake
+    assert "confidence" not in body
+```
+
+### pytest config (pyproject.toml)
+```toml
+[tool.pytest.ini_options]
+addopts = "--import-mode=importlib"
+testpaths = ["services"]
+```
+
+---
+
+## PYTHON
+- Functional-first, PEP 8, 88-char lines, 4-space indent
+- Type hints mandatory on all functions (`str | None`, Python 3.10+)
+- Prefer comprehensions over `map`/`filter` + lambda
+- Immutability: `tuple`, `frozenset`, `dataclass(frozen=True)`
+- Specific exceptions, early returns, no bare `except:`
+- Data containers: `dataclass` or `NamedTuple`, never plain `class`
+
+Tools: `black .` · `ruff check .` · `mypy src/` · `pytest`
+Config: line-length=88, `ruff select=["E","F","I"]`, `mypy strict=true`
 
 ---
 
@@ -137,7 +265,7 @@ API Gateway → Lambda (entry)
 - Supervisor Agent routes to sub-agents via A2A protocol natively
 - VM-level session isolation per user
 - MCP tool integration: expose Lambda functions as tools
-- Memory: managed persistent memory across sessions (replaces manual DynamoDB memory)
+- Memory: managed persistent memory across sessions
 
 ---
 
@@ -161,19 +289,6 @@ API Gateway → Lambda (entry)
 - DLQ with alarm: any message in DLQ = PagerDuty/SNS alert
 - Prefer blue/green deployments via Lambda aliases + traffic shifting
 - Document Architecture Decision Records (ADRs) for non-obvious choices
-
----
-
-## PYTHON
-- Functional-first, PEP 8, 88-char lines, 4-space indent
-- Type hints mandatory on all functions (`str | None`, Python 3.10+)
-- Prefer comprehensions over `map`/`filter` + lambda
-- Immutability: `tuple`, `frozenset`, `dataclass(frozen=True)`
-- Specific exceptions, early returns, no bare `except:`
-- Data containers: `dataclass` or `NamedTuple`, never plain `class`
-
-Tools: `black .` · `ruff check .` · `mypy src/` · `pytest`
-Config: line-length=88, `ruff select=["E","F","I"]`, `mypy strict=true`
 
 ---
 
