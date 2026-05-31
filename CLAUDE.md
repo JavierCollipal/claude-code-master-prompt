@@ -359,5 +359,84 @@ npx create-next-app@latest project --typescript --tailwind --eslint --app --src-
 
 ---
 
+## REPO ONBOARDING — CONTEXT FILES
+
+Research basis: AGENTS.md (Linux Foundation standard, 60k+ repos); empirical study of 2,303 agent context files (2025); GitHub analysis of 2,500+ AGENTS.md files. Key finding: security constraints and performance requirements are missing from 85% of all repo context files. Session continuity tracking is missing from all current standards — the `claude/` pattern below fills that gap.
+
+### Step 1 — Check what exists
+
+```bash
+ls CLAUDE.md AGENTS.md claude/CONTEXT.md 2>/dev/null
+```
+
+| File | Loaded by | Action if absent |
+|------|-----------|-----------------|
+| `CLAUDE.md` | Claude Code (automatic) | Create using template below |
+| `AGENTS.md` | All AI tools — vendor-neutral Linux Foundation standard | Create alongside CLAUDE.md |
+| `claude/CONTEXT.md` | Manually referenced | Create after first session |
+
+### Step 2 — Create AGENTS.md if missing (keep under 150 lines)
+
+```
+# [Project name] — [one sentence: what it does + maturity]
+
+## Commands
+[exact build / test / lint / run commands with all flags — no descriptions, just commands]
+
+## Stack
+[framework · runtime · database · auth · deploy — with exact versions]
+
+## Structure
+[directory tree — one-line description per folder]
+
+## Rules
+- NEVER [constraint] — [reason]
+[naming conventions; patterns to follow; patterns explicitly to avoid]
+
+## Security
+[auth requirements; input validation rules; secret handling; threat boundaries]
+← this section is missing in 85% of repos and causes the most agent mistakes
+
+## Performance
+[latency budgets; throughput targets; memory / timeout constraints]
+← also missing in 85% of repos
+
+## Architecture decisions
+[2–3 non-obvious decisions + the reason — so the agent doesn't undo them]
+```
+
+### Step 3 — Maintain `claude/` folder for session continuity
+
+Every repo gets:
+```
+claude/
+├── README.md       ← one-time: explains the folder, rules (no code, no secrets)
+└── CONTEXT.md      ← updated at end of every session
+```
+
+`CONTEXT.md` format:
+```
+## Last task accomplished
+[date] — [what was built · test counts · key metrics]
+
+## Current state
+[tests passing / build status / last commit / known blockers]
+
+## Next session plan
+Option A — [specific steps + files to touch]
+Option B — [alternative with tradeoffs]
+
+## Resume commands
+[exact commands to verify state before starting — e.g. make test, git log]
+```
+
+Rules for `CONTEXT.md`:
+- Update it at the end of every working session, before the final commit
+- Keep under 100 lines — summarise, don't log everything
+- The Option A / Option B format forces explicit prioritisation across sessions
+- Commit it with the session's final commit so git history tracks it
+
+---
+
 ## .gitignore
 `.env` `.env.*` `*.pem` `*.key` `credentials.json` `*.tfstate` `*.tfstate.backup` `.terraform/` `node_modules/` `dist/` `.next/` `build/` `__pycache__/` `.venv/`
