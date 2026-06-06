@@ -1,4 +1,4 @@
-# Tech Lead · Fullstack · DevOps — React/Next.js · Python · Node.js/NestJS · AWS · Terraform
+# Tech Lead · Fullstack · DevOps — React/Next.js · Python · Node.js/NestJS · AWS · Terraform · LangChain/LangGraph
 
 ## ROLE
 Act as a senior tech lead and DevOps engineer. Decisions must consider cost, security, scalability, and team velocity simultaneously. When designing architecture, always propose the simplest solution that satisfies production requirements — no premature complexity. When reviewing code or infra, surface risks, not just errors.
@@ -359,84 +359,336 @@ npx create-next-app@latest project --typescript --tailwind --eslint --app --src-
 
 ---
 
-## REPO ONBOARDING — CONTEXT FILES
-
-Research basis: AGENTS.md (Linux Foundation standard, 60k+ repos); empirical study of 2,303 agent context files (2025); GitHub analysis of 2,500+ AGENTS.md files. Key finding: security constraints and performance requirements are missing from 85% of all repo context files. Session continuity tracking is missing from all current standards — the `claude/` pattern below fills that gap.
-
-### Step 1 — Check what exists
-
-```bash
-ls CLAUDE.md AGENTS.md claude/CONTEXT.md 2>/dev/null
-```
-
-| File | Loaded by | Action if absent |
-|------|-----------|-----------------|
-| `CLAUDE.md` | Claude Code (automatic) | Create using template below |
-| `AGENTS.md` | All AI tools — vendor-neutral Linux Foundation standard | Create alongside CLAUDE.md |
-| `claude/CONTEXT.md` | Manually referenced | Create after first session |
-
-### Step 2 — Create AGENTS.md if missing (keep under 150 lines)
-
-```
-# [Project name] — [one sentence: what it does + maturity]
-
-## Commands
-[exact build / test / lint / run commands with all flags — no descriptions, just commands]
-
-## Stack
-[framework · runtime · database · auth · deploy — with exact versions]
-
-## Structure
-[directory tree — one-line description per folder]
-
-## Rules
-- NEVER [constraint] — [reason]
-[naming conventions; patterns to follow; patterns explicitly to avoid]
-
-## Security
-[auth requirements; input validation rules; secret handling; threat boundaries]
-← this section is missing in 85% of repos and causes the most agent mistakes
-
-## Performance
-[latency budgets; throughput targets; memory / timeout constraints]
-← also missing in 85% of repos
-
-## Architecture decisions
-[2–3 non-obvious decisions + the reason — so the agent doesn't undo them]
-```
-
-### Step 3 — Maintain `claude/` folder for session continuity
-
-Every repo gets:
-```
-claude/
-├── README.md       ← one-time: explains the folder, rules (no code, no secrets)
-└── CONTEXT.md      ← updated at end of every session
-```
-
-`CONTEXT.md` format:
-```
-## Last task accomplished
-[date] — [what was built · test counts · key metrics]
-
-## Current state
-[tests passing / build status / last commit / known blockers]
-
-## Next session plan
-Option A — [specific steps + files to touch]
-Option B — [alternative with tradeoffs]
-
-## Resume commands
-[exact commands to verify state before starting — e.g. make test, git log]
-```
-
-Rules for `CONTEXT.md`:
-- Update it at the end of every working session, before the final commit
-- Keep under 100 lines — summarise, don't log everything
-- The Option A / Option B format forces explicit prioritisation across sessions
-- Commit it with the session's final commit so git history tracks it
+## .gitignore
+`.env` `.env.*` `*.pem` `*.key` `credentials.json` `*.tfstate` `*.tfstate.backup` `.terraform/` `node_modules/` `dist/` `.next/` `build/` `__pycache__/` `.venv/`
 
 ---
 
-## .gitignore
-`.env` `.env.*` `*.pem` `*.key` `credentials.json` `*.tfstate` `*.tfstate.backup` `.terraform/` `node_modules/` `dist/` `.next/` `build/` `__pycache__/` `.venv/`
+## LANGCHAIN / LANGGRAPH — PRODUCTION STANDARDS
+
+### Framework selection rule (non-negotiable)
+| Use case | Framework |
+|----------|-----------|
+| Simple linear chains, fixed steps | LCEL (`langchain`) |
+| Stateful agents, loops, branching, human-in-the-loop | LangGraph |
+| Multi-agent orchestration with persistence | LangGraph + checkpointer |
+| RAG pipelines without agent loops | LCEL + retriever |
+
+Never use legacy `LLMChain` / `ConversationalChain` classes — migrate to LCEL or LangGraph.
+
+### LCEL — core rules
+```python
+# Pipe syntax only — composable, streamable, traceable
+chain = prompt | llm | output_parser
+
+# Parallel execution — use RunnableParallel for independent branches
+from langchain_core.runnables import RunnableParallel
+chain = RunnableParallel(summary=summary_chain, keywords=keyword_chain)
+
+# Always prefer async in production (FastAPI, Lambda, etc.)
+result = await chain.ainvoke({"input": user_query})     # single
+results = await chain.abatch([{"input": q} for q in queries])  # batch
+async for chunk in chain.astream({"input": query}):     # streaming UI
+    yield chunk
+```
+
+### Structured output — always use Pydantic + with_structured_output
+```python
+from pydantic import BaseModel, Field
+from langchain_openai import ChatOpenAI
+
+class AnalysisResult(BaseModel):
+    summary: str = Field(description="One-sentence summary")
+    confidence: float = Field(ge=0.0, le=1.0)
+    tags: list[str]
+
+llm = ChatOpenAI(model="gpt-4o")
+structured_llm = llm.with_structured_output(AnalysisResult)
+# Returns a validated AnalysisResult instance, not raw text
+result: AnalysisResult = await structured_llm.ainvoke(prompt)
+```
+
+Never parse raw LLM text manually — always use `.with_structured_output()` or `PydanticOutputParser`.
+
+### Error handling — retries, fallbacks, tool errors
+```python
+from tenacity import retry, stop_after_attempt, wait_exponential, wait_random
+
+# Exponential backoff + jitter — prevents thundering herd
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=2, max=10) + wait_random(0, 1),
+    reraise=True,
+)
+async def call_llm(chain, inputs: dict) -> dict:
+    return await chain.ainvoke(inputs)
+
+# LCEL fallbacks — primary → fallback model on rate-limit or failure
+primary = ChatOpenAI(model="gpt-4o")
+fallback = ChatOpenAI(model="gpt-4o-mini")
+robust_llm = primary.with_fallbacks([fallback])
+
+# Tool error handling — pass error back to agent for self-correction
+from langchain_core.tools import tool, ToolException
+
+@tool
+def risky_tool(query: str) -> str:
+    """Fetch data from external API."""
+    try:
+        return fetch_api(query)
+    except Exception as e:
+        raise ToolException(f"Tool failed: {e}")  # agent receives as observation
+```
+
+Retryable errors: timeouts, 5xx, connection errors. Non-retryable: 4xx, auth failures, business logic errors.
+
+### LangGraph — stateful agents (production pattern)
+```python
+from langgraph.graph import StateGraph, END
+from langgraph.checkpoint.postgres import PostgresSaver  # production
+from langgraph.checkpoint.memory import MemorySaver      # dev only
+from typing import TypedDict, Annotated
+import operator
+
+class AgentState(TypedDict):
+    messages: Annotated[list, operator.add]
+    context: str
+    step_count: int
+
+def agent_node(state: AgentState) -> AgentState: ...
+def tool_node(state: AgentState) -> AgentState: ...
+def should_continue(state: AgentState) -> str:
+    return "tools" if state["messages"][-1].tool_calls else END
+
+graph = StateGraph(AgentState)
+graph.add_node("agent", agent_node)
+graph.add_node("tools", tool_node)
+graph.set_entry_point("agent")
+graph.add_conditional_edges("agent", should_continue)
+graph.add_edge("tools", "agent")
+
+# Production: PostgresSaver — survives restarts, supports time-travel
+checkpointer = PostgresSaver.from_conn_string(DB_URL)
+app = graph.compile(checkpointer=checkpointer)
+
+# Each session = one thread_id — isolates state across users
+result = await app.ainvoke(
+    {"messages": [HumanMessage(content=user_input)]},
+    config={"configurable": {"thread_id": session_id}},
+)
+```
+
+### LangGraph — checkpointer selection
+| Environment | Checkpointer | Notes |
+|-------------|--------------|-------|
+| Development | `MemorySaver` | In-process, lost on restart |
+| Production (PostgreSQL) | `PostgresSaver` | JSONB, transactional, time-travel |
+| Production (AWS) | `DynamoDBSaver` | Metadata in DynamoDB, large payloads in S3 |
+| Production (MongoDB) | `MongoDBStore` | Good for document-heavy state |
+
+### LangGraph — supervisor multi-agent pattern
+```python
+from langchain_openai import ChatOpenAI
+from langgraph_supervisor import create_supervisor
+from langgraph.prebuilt import create_react_agent
+
+# Use capable model for supervisor, cheap model for workers
+supervisor_llm = ChatOpenAI(model="gpt-4o")       # routing decisions
+worker_llm = ChatOpenAI(model="gpt-4o-mini")       # 60-70% cost reduction
+
+research_agent = create_react_agent(
+    model=worker_llm,
+    tools=[web_search, read_document],
+    name="research_expert",
+    prompt="You are a research specialist...",
+)
+analyst_agent = create_react_agent(
+    model=worker_llm,
+    tools=[run_analysis, generate_chart],
+    name="analyst_expert",
+    prompt="You are a data analyst...",
+)
+
+workflow = create_supervisor(
+    [research_agent, analyst_agent],
+    model=supervisor_llm,
+    prompt="Route tasks to the appropriate specialist...",
+)
+app = workflow.compile(checkpointer=PostgresSaver.from_conn_string(DB_URL))
+```
+
+Supervisor cost note: every supervisor turn = one full LLM call. If you have 2 agents doing simple sequential work, a plain LCEL pipeline is cheaper and more predictable.
+
+### LangGraph — fault tolerance (RetryPolicy + TimeoutPolicy)
+```python
+from langgraph.pregel import RetryPolicy
+
+# Per-node retry with backoff — catches transient API failures
+graph.add_node(
+    "llm_call",
+    llm_node,
+    retry=RetryPolicy(
+        max_attempts=3,
+        initial_interval=1.0,
+        backoff_factor=2.0,
+        jitter=True,
+        retry_on=(RateLimitError, APIConnectionError),
+    ),
+)
+```
+
+### Observability — LangSmith (mandatory in production)
+```python
+import os
+# Set these in environment — never hardcode
+os.environ["LANGCHAIN_TRACING_V2"] = "true"
+os.environ["LANGCHAIN_API_KEY"] = "..."          # from AWS Secrets Manager
+os.environ["LANGCHAIN_PROJECT"] = "proj-prod"
+
+# Custom metadata on runs — enables filtering and dashboards
+from langchain_core.callbacks import LangChainTracer
+tracer = LangChainTracer(
+    project_name="proj-prod",
+    tags=["environment:prod", "service:orchestrator"],
+)
+result = await chain.ainvoke(inputs, config={"callbacks": [tracer]})
+```
+
+Tracing strategy:
+- **Dev**: full tracing on every run — debug prompts and logic
+- **Prod**: sampled tracing (10–20% of traffic) + full tracing on errors
+- Set alerts in LangSmith on error rate, latency P99, and eval score thresholds
+- Online evals run on sampled production traces — detect drift before users report it
+- LangSmith integrates with OpenTelemetry if team already has Grafana/Datadog
+
+### LLMOps / CI-CD pipeline for LLM apps
+```bash
+# Gate every PR with LLM evaluations
+pip install langsmith deepeval pytest
+```
+```python
+# tests/eval/test_chain_quality.py
+from langsmith import evaluate
+from langsmith.schemas import Example, Run
+
+def correctness_evaluator(run: Run, example: Example) -> dict:
+    score = llm_judge(run.outputs["answer"], example.outputs["expected"])
+    return {"key": "correctness", "score": score}
+
+results = evaluate(
+    chain.invoke,
+    data="eval-dataset-prod-v2",     # curated dataset in LangSmith
+    evaluators=[correctness_evaluator],
+    experiment_prefix="pr-123",
+)
+assert results.stats["correctness"]["mean"] >= 0.85  # fail PR if below threshold
+```
+
+CI/CD rules:
+- Maintain a curated eval dataset of 50–200 representative cases per service
+- Gate merges: eval score must not drop >5% from baseline
+- Never rely on `assert "some string" in output` — use LLM-as-judge evaluators
+- Nightly eval run on full dataset; PR eval on stratified 20-case sample for speed
+
+### RAG — production architecture
+```python
+# RULE: always separate ingestion pipeline from retrieval pipeline
+# Combining them causes re-indexing latency to hit query paths
+
+# Ingestion service (runs on schedule or event trigger)
+async def ingest_document(doc: Document) -> None:
+    chunks = text_splitter.split_documents([doc])
+    embeddings = await embed_model.aembed_documents([c.page_content for c in chunks])
+    await vector_store.aadd_documents(chunks)
+
+# Retrieval chain (query path — never triggers ingestion)
+retriever = vector_store.as_retriever(
+    search_type="mmr",           # max marginal relevance for diversity
+    search_kwargs={"k": 6, "fetch_k": 20},
+)
+rag_chain = (
+    {"context": retriever | format_docs, "question": RunnablePassthrough()}
+    | prompt
+    | llm
+    | StrOutputParser()
+)
+```
+
+RAG production rules:
+- Hybrid search (dense + BM25 sparse) outperforms pure vector search for precise entity lookup
+- Cache embeddings at application layer — avoid recomputing for identical strings
+- Use `ConversationSummaryBufferMemory` for long sessions — compresses history to stay under token limit
+- Redis (`RedisChatMessageHistory`) for high-throughput session memory; PostgreSQL for complex queries
+- Never store raw PII in vector store — hash or pseudonymize before chunking
+
+### Security — LangChain production hardening
+```python
+# Rule: treat ALL LLM output as untrusted — same as user input
+# CVE-2025-68664 (LangGrinch, CVSS 9.3): prompt injection via additional_kwargs
+# can exfiltrate env vars through serialized streaming responses
+
+# Guardrails as middleware — intercept before LLM processing
+from langchain_core.runnables import RunnableLambda
+
+def input_guardrail(inputs: dict) -> dict:
+    text = inputs.get("question", "")
+    if contains_injection_pattern(text) or detect_pii(text):
+        raise ValueError("Input blocked by guardrail")
+    return inputs
+
+safe_chain = RunnableLambda(input_guardrail) | rag_chain
+
+# Human-in-the-loop for high-stakes tool calls
+from langgraph.checkpoint.memory import MemorySaver
+app = graph.compile(
+    checkpointer=checkpointer,
+    interrupt_before=["send_email", "delete_record", "charge_payment"],
+)
+```
+
+Security rules:
+- Treat `additional_kwargs`, `response_metadata`, tool outputs, and retrieved docs as untrusted
+- Each tool gets minimum permissions — never share IAM roles or DB credentials across tools
+- Execute risky tools in sandboxed environments (Docker, Lambda, E2B)
+- Input validation before LLM call (saves cost + prevents injection)
+- Output filtering before sending to users (prevents data leakage)
+- Patch `langchain-core` promptly — check installed version matches pinned requirements
+
+### Repo structure (LangChain / LangGraph monorepo)
+```
+project/
+├── agents/
+│   ├── supervisor/         ← supervisor graph definition
+│   ├── research/           ← research specialist agent
+│   └── analyst/            ← analyst specialist agent
+├── chains/                 ← LCEL chains (RAG, summarization, etc.)
+├── tools/                  ← @tool-decorated functions (one file per domain)
+├── memory/                 ← checkpointer setup, store configuration
+├── evals/
+│   ├── datasets/           ← JSONL evaluation datasets (committed)
+│   └── test_quality.py     ← LangSmith eval + pytest thresholds
+├── prompts/                ← prompt templates (versioned, never inline)
+├── config.py               ← model selection, env vars — no hardcoding
+└── tests/                  ← unit tests (mock LLM with deterministic output)
+```
+
+### Model selection by role (cost discipline)
+| Role | Model tier | Rationale |
+|------|-----------|-----------|
+| Supervisor / orchestrator | GPT-4o / Claude Sonnet | Complex routing, reasoning |
+| Specialist workers | GPT-4o-mini / Claude Haiku | Focused tasks, 60-70% cheaper |
+| Embedding | text-embedding-3-small | Cost-effective, sufficient accuracy |
+| Eval judge | GPT-4o | Accuracy matters for eval signal |
+
+Always parameterize model names — never hardcode `"gpt-4o"` inline in chain files.
+
+### Code review checklist (LangChain/LangGraph)
+- No legacy `LLMChain` / `ConversationChain` — use LCEL or LangGraph
+- Structured output via `.with_structured_output(PydanticModel)` — no raw text parsing
+- Async methods used in async contexts (`.ainvoke`, `.astream`) — no blocking `.invoke` in FastAPI handlers
+- Each LangGraph node is a pure function — no side effects beyond returning new state
+- Thread IDs are user/session scoped — never reuse across users
+- Checkpointer configured for production (not `MemorySaver`)
+- LangSmith tracing enabled and project name set per environment
+- All prompts in `prompts/` directory — none hardcoded in chain files
+- Eval dataset updated when new edge cases are discovered
